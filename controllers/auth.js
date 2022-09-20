@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
 
+import { sendEmail } from '../utils/sendEmail.js';
+
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -67,41 +69,60 @@ export const signup = async (req, res) => {
     }
   );
 
-  // SEND EMAIL
-  const params = {
-    Source: process.env.EMAIL_FROM,
-    Destination: {
-      ToAddresses: [email],
-    },
-    ReplyToAddresses: [process.env.EMAIL_TO],
-    Message: {
-      Body: {
-        Html: {
-          Charset: 'UTF-8',
-          Data: `<html>
-              <h1>Hello ${username}</h1>
-              <p>Please verify your email address through thil link:</p>
-              <a href='${process.env.CLIENT_URL}/login/activate/${token}'>Link</a>
-              <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
-              <br></br>
-              <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>
-              </html>`,
-        },
-      },
-      Subject: {
-        Charset: 'UTF-8',
-        Data: `DEI DESSOOOOO`,
-      },
-    },
-  };
+  // HTML Message
+  const message = `
+      <p>Please verify your email address through thil link:</p>
+      <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Link</a>
+      <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
+      <br></br>
+      <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>`;
+  //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Password Reset Request',
+      text: message,
+    });
 
-  const sendEmailOnRegister = ses.sendEmail(params).promise();
-  sendEmailOnRegister
-    // .then((data) => console.log('email submitted to ses', data))
-    .then((data) => res.status(200).json({ success: true }))
-    .catch((error) => console.log('ERRONE', error));
+    res.status(200).json({ success: true, data: 'Email Sent' });
+  } catch (err) {
+    console.log(err);
+  }
 
-  res.status(200).json({ success: true });
+  // SEND EMAIL WITH AWS
+  // const params = {
+  //   Source: process.env.EMAIL_FROM,
+  //   Destination: {
+  //     ToAddresses: [email],
+  //   },
+  //   ReplyToAddresses: [process.env.EMAIL_TO],
+  //   Message: {
+  //     Body: {
+  //       Html: {
+  //         Charset: 'UTF-8',
+  //         Data: `<html>
+  //             <h1>Hello ${username}</h1>
+  //             <p>Please verify your email address through thil link:</p>
+  //             <a href='${process.env.CLIENT_URL}/login/activate/${token}'>Link</a>
+  //             <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
+  //             <br></br>
+  //             <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>
+  //             </html>`,
+  //       },
+  //     },
+  //     Subject: {
+  //       Charset: 'UTF-8',
+  //       Data: `DEI DESSOOOOO`,
+  //     },
+  //   },
+  // };
+
+  // const sendEmailOnRegister = ses.sendEmail(params).promise();
+  // sendEmailOnRegister
+  //   .then((data) => res.status(200).json({ success: true }))
+  //   .catch((error) => console.log('ERRONE', error));
+
+  // res.status(200).json({ success: true });
 };
 
 // @desc    Activate user account
@@ -180,4 +201,28 @@ export const activateAccount = async (req, res) => {
       });
     }
   );
+};
+
+export const testEmail = async (req, res) => {
+  const { email } = req.body;
+
+  console.log(email);
+
+  // HTML Message
+  const message = `
+  <h1>You have requested a password reset</h1>
+  <p>Please make a put request to the following link:</p>
+`;
+  //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Password Reset Request',
+      text: message,
+    });
+
+    res.status(200).json({ success: true, data: 'Email Sent' });
+  } catch (err) {
+    console.log(err);
+  }
 };
