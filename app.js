@@ -1,7 +1,13 @@
 import express from 'express';
 import 'dotenv/config';
 
+import connectDB from './config/db.js';
+
+// ROUTES
 import people from './routes/people.js';
+import auth from './routes/auth.js';
+
+connectDB();
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -23,5 +29,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/people', people);
+app.use('/api/auth', auth);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
