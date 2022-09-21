@@ -80,7 +80,7 @@ export const signup = async (req, res) => {
   try {
     await sendEmail({
       to: email,
-      subject: 'Password Reset Request',
+      subject: 'Welcome to Codeyful',
       text: message,
     });
 
@@ -129,8 +129,6 @@ export const signup = async (req, res) => {
 // @route   POST /api/auth/signup/activate
 // @access  Public
 export const activateAccount = async (req, res) => {
-  // console.log('CIAOOOOO');
-  // console.log(req.body);
   const token = req.body.token;
   if (token === null) {
     return res.status(401).json({
@@ -203,16 +201,38 @@ export const activateAccount = async (req, res) => {
   );
 };
 
-export const testEmail = async (req, res) => {
+// @desc    Request to reset forgotten password
+// @route   PUT /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  // check if user exist
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 
-  console.log(email);
+  if (!existingUser) {
+    return res.json({
+      error: 'User not found! Please double check the entered email.',
+    });
+  }
 
-  // HTML Message
+  // generate token with user name
+  let token;
+  token = jwt.sign({ email }, process.env.JWT_RESET_PASSWORD, {
+    expiresIn: '1d',
+  });
+  const userID = existingUser._id;
+  // console.log(userID);
+  await User.updateOne({ _id: userID }, { $set: { resetPasswordLink: token } });
   const message = `
-  <h1>You have requested a password reset</h1>
-  <p>Please make a put request to the following link:</p>
-`;
+  <p>Please verify your email address through thil link:</p>
+  <a href='${process.env.CLIENT_URL}/login/reset-password/${token}' clicktracking=off>Link</a>
+  <br></br>
+  <p>The link will expire in 24 hours. If you try to reset after that time you need to repeat the procedure</p>`;
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
   try {
     await sendEmail({
@@ -226,3 +246,87 @@ export const testEmail = async (req, res) => {
     console.log(err);
   }
 };
+
+// @desc    Reset password
+// @route   PUT /api/auth/reset-password
+// @access  Public
+export const resetPassword = (req, res) => {
+  const { resetPasswordLink, newPassword } = req.body;
+
+  if (!resetPasswordLink) {
+    return res.json({
+      error: 'Link not provided',
+    });
+  }
+
+  // check if token is expired
+  jwt.verify(
+    resetPasswordLink,
+    process.env.JWT_RESET_PASSWORD,
+    async function (err, decoded) {
+      if (err) {
+        return res.status(401).json({
+          error:
+            'Expired link. Please repeat the reset procedure from start to get a new link. The link expires in 24 hours.',
+        });
+      }
+      let existingUser;
+      try {
+        existingUser = await User.findOne({
+          resetPasswordLink: resetPasswordLink,
+        });
+      } catch (err) {
+        res.status(500).json(err);
+      }
+
+      if (!existingUser) {
+        return res.json({
+          error:
+            'User not found! The password may have already been reset. Repeat the whole procedure',
+        });
+      }
+
+      let hashedPassword;
+      try {
+        hashedPassword = await bcrypt.hash(newPassword, 12);
+      } catch (err) {
+        res.status(500).json(err);
+      }
+
+      const userID = existingUser._id;
+      await User.updateOne(
+        { _id: userID },
+        { $set: { password: hashedPassword, resetPasswordLink: '' } }
+      );
+
+      res.status(200).json({
+        success: true,
+        data: 'Password reset',
+      });
+    }
+  );
+};
+
+// export const testEmail = async (req, res) => {
+//   const { email } = req.body;
+
+//   console.log(email);
+
+//   // HTML Message
+//   const message = `
+//   <h1>You have requested a password reset</h1>
+//   <p>Please make a put request to the following link:</p>
+// `;
+//   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+//   try {
+//     await sendEmail({
+//       to: email,
+//       subject: 'Password Reset Request',
+//       text: message,
+//     });
+
+//     res.status(200).json({ success: true, data: 'Email Sent' });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };

@@ -17,29 +17,33 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    // isBuddy: {
-    //   type: Boolean,
-    //   required: true,
-    //   default: true,
-    // },
-    // isMentor: {
-    //   type: Boolean,
-    //   required: true,
-    //   default: false,
-    // },
-    // isAdmin: {
-    //   type: Boolean,
-    //   required: true,
-    //   default: false,
-    // },
-    // country: {
-    //   type: String,
-    // },
-    // shortDescription: {
-    //   type: String,
-    //   required: true,
-    //   // minlength: 6,
-    // },
+    resetPasswordLink: {
+      type: String,
+      default: '',
+    },
+    isBuddy: {
+      type: Boolean,
+      // required: true,
+      default: true,
+    },
+    isMentor: {
+      type: Boolean,
+      // required: true,
+      default: false,
+    },
+    isAdmin: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    country: {
+      type: String,
+    },
+    shortDescription: {
+      type: String,
+      // required: true,
+      // minlength: 6,
+    },
     // longDescription: {
     //   type: String,
     //   //   required: true,
