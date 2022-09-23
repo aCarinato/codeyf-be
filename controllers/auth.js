@@ -1,17 +1,17 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
 
 import { sendEmail } from '../utils/sendEmail.js';
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
+// AWS.config.update({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//   region: process.env.AWS_REGION,
+// });
 
-const ses = new AWS.SES({ apiVersion: '2010-12-01' });
+// const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
 // @desc    Signup new user
 // @route   POST /api/auth/signup
@@ -71,11 +71,27 @@ export const signup = async (req, res) => {
 
   // HTML Message
   const message = `
-      <p>Please verify your email address through thil link:</p>
-      <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Link</a>
-      <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
-      <br></br>
-      <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>`;
+  <html lang="en">
+    <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+        <p>Hi ${username}!</p>
+        <p>Please click on the link below to verify your identity:</p>
+        <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Confirm Account</a>
+        <br></br>
+        <p>Or copy and paste the following link in your browser</p>
+        <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
+        <br></br>
+        <p>If you do not click the verification link your account will not be activated.</p>
+        <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>
+      </div>
+    </body>
+  </html>
+      `;
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
   try {
     await sendEmail({
@@ -84,7 +100,20 @@ export const signup = async (req, res) => {
       text: message,
     });
 
-    res.status(200).json({ success: true, data: 'Email Sent' });
+    res.status(200).json({
+      success: true,
+      message: `
+        <div className="center-text">
+          <br></br>
+          <br></br>
+          <p>The verification link for your account <span className="submit-success-msg">has been sent to ${email}!</span> Follow the instructions there contained.<p>
+          <br></br>
+          <p>If you do not click the verification link your account <span className="submit-success-msg">will not be activated.</span></p>
+          <br></br>
+          <p>Please note the link <span className="submit-success-msg">will expire in 7 days.</span></p>
+        </div>
+        `,
+    });
   } catch (err) {
     console.log(err);
   }
@@ -216,7 +245,8 @@ export const forgotPassword = async (req, res) => {
 
   if (!existingUser) {
     return res.json({
-      error: 'User not found! Please double check the entered email.',
+      error:
+        'User not found! Either the user does not exist or the entered email was mispelled. Please double check',
     });
   }
 
@@ -230,7 +260,7 @@ export const forgotPassword = async (req, res) => {
   await User.updateOne({ _id: userID }, { $set: { resetPasswordLink: token } });
   const message = `
   <p>Please verify your email address through thil link:</p>
-  <a href='${process.env.CLIENT_URL}/login/reset-password/${token}' clicktracking=off>Link</a>
+  <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Link</a>
   <br></br>
   <p>The link will expire in 24 hours. If you try to reset after that time you need to repeat the procedure</p>`;
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
@@ -240,8 +270,10 @@ export const forgotPassword = async (req, res) => {
       subject: 'Password Reset Request',
       text: message,
     });
-
-    res.status(200).json({ success: true, data: 'Email Sent' });
+    // this will be res.data
+    res
+      .status(200)
+      .json({ success: true, message: `Email successfully sent to ${email}` });
   } catch (err) {
     console.log(err);
   }
@@ -301,7 +333,7 @@ export const resetPassword = (req, res) => {
 
       res.status(200).json({
         success: true,
-        data: 'Password reset',
+        message: 'Password reset',
       });
     }
   );
