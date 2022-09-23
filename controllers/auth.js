@@ -1,17 +1,17 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
 
 import { sendEmail } from '../utils/sendEmail.js';
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
+// AWS.config.update({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//   region: process.env.AWS_REGION,
+// });
 
-const ses = new AWS.SES({ apiVersion: '2010-12-01' });
+// const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
 // @desc    Signup new user
 // @route   POST /api/auth/signup
@@ -71,20 +71,53 @@ export const signup = async (req, res) => {
 
   // HTML Message
   const message = `
-      <p>Please verify your email address through thil link:</p>
-      <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Link</a>
-      <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
-      <br></br>
-      <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>`;
+  <html lang="en">
+    <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+        <h1>codeyful</h1>
+        <br></br>
+        <p>Hi ${username}!</p>
+        <p>Please click on the link below to verify your identity:</p>
+        <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Confirm Account</a>
+        <br></br>
+        <p>Or copy and paste the following link in your browser</p>
+        <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
+        <br></br>
+        <p>If you do not click the verification link your account will not be activated.</p>
+        <p>The link will expire in 7 days. If you try to activate after that time you will need to repeat the sign up procedure (you can use the same credentials)</p>
+      </div>
+    </body>
+  </html>
+      `;
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
   try {
     await sendEmail({
       to: email,
-      subject: 'Password Reset Request',
+      subject: 'Welcome to Codeyful',
       text: message,
     });
 
-    res.status(200).json({ success: true, data: 'Email Sent' });
+    res.status(200).json({
+      success: true,
+      message: `
+        <div className="center-text">
+          <br></br>
+          <br></br>
+          <p>The verification link for your account <span className="submit-success-msg">has been sent to ${email}!</span> Follow the instructions there contained.<p>
+          <br></br>
+          <p>If you do not click the verification link your account <span className="submit-success-msg">will not be activated.</span></p>
+          <br></br>
+          <p>Please note the link <span className="submit-success-msg">will expire in 7 days.</span></p>
+          <br></br>
+          <p>Please make sure to <span className="submit-success-msg">check your spam and trash</span> if you can't find the email</p>
+        </div>
+        `,
+    });
   } catch (err) {
     console.log(err);
   }
@@ -129,8 +162,6 @@ export const signup = async (req, res) => {
 // @route   POST /api/auth/signup/activate
 // @access  Public
 export const activateAccount = async (req, res) => {
-  // console.log('CIAOOOOO');
-  // console.log(req.body);
   const token = req.body.token;
   if (token === null) {
     return res.status(401).json({
@@ -203,16 +234,64 @@ export const activateAccount = async (req, res) => {
   );
 };
 
-export const testEmail = async (req, res) => {
+// @desc    Request to reset forgotten password
+// @route   PUT /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  // check if user exist
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 
-  console.log(email);
+  // if (existingUser.resetPasswordLink !== '') {
+  //   return res.json({
+  //     error: `The link has already been sent to ${email}. Please make sure to check your spam and trash if you can't find the email`,
+  //   });
+  // }
 
-  // HTML Message
+  if (!existingUser) {
+    return res.json({
+      error:
+        'User not found! Either the user does not exist or the entered email was mispelled. Please double check',
+    });
+  }
+
+  // generate token with user name
+  let token;
+  token = jwt.sign({ email }, process.env.JWT_RESET_PASSWORD, {
+    expiresIn: '1d',
+  });
+  const userID = existingUser._id;
+  // console.log(userID);
+  await User.updateOne({ _id: userID }, { $set: { resetPasswordLink: token } });
   const message = `
-  <h1>You have requested a password reset</h1>
-  <p>Please make a put request to the following link:</p>
-`;
+    <html lang="en">
+      <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+        </head>
+        <body>
+          <h1>codeyful</h1>
+          <br></br>
+          <p>Hi ${existingUser.username},</p>
+          <br></br>
+          <p>A password reset for your account was requested.</p>
+          <p>Please click the link below to change your password.</p>
+          <br></br>
+          <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Change your password</a>
+          <br></br>
+          <p>Note that this link is valid for 24 hours. After the time limit has expired, you will have to resubmit the request for a password reset.</p>
+        </body>
+      </div>
+    </html>
+    `;
+
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
   try {
     await sendEmail({
@@ -220,9 +299,95 @@ export const testEmail = async (req, res) => {
       subject: 'Password Reset Request',
       text: message,
     });
-
-    res.status(200).json({ success: true, data: 'Email Sent' });
+    // this will be res.data
+    res
+      .status(200)
+      .json({ success: true, message: `Email successfully sent to ${email}` });
   } catch (err) {
     console.log(err);
   }
 };
+
+// @desc    Reset password
+// @route   PUT /api/auth/reset-password
+// @access  Public
+export const resetPassword = (req, res) => {
+  const { resetPasswordLink, newPassword } = req.body;
+
+  if (!resetPasswordLink) {
+    return res.json({
+      error: 'Link not provided',
+    });
+  }
+
+  // check if token is expired
+  jwt.verify(
+    resetPasswordLink,
+    process.env.JWT_RESET_PASSWORD,
+    async function (err, decoded) {
+      if (err) {
+        return res.status(401).json({
+          error:
+            'Expired link. Please repeat the reset procedure from start to get a new link. The link expires in 24 hours.',
+        });
+      }
+      let existingUser;
+      try {
+        existingUser = await User.findOne({
+          resetPasswordLink: resetPasswordLink,
+        });
+      } catch (err) {
+        res.status(500).json(err);
+      }
+
+      if (!existingUser) {
+        return res.json({
+          error:
+            'User not found! The password may have already been reset. Repeat the whole procedure',
+        });
+      }
+
+      let hashedPassword;
+      try {
+        hashedPassword = await bcrypt.hash(newPassword, 12);
+      } catch (err) {
+        res.status(500).json(err);
+      }
+
+      const userID = existingUser._id;
+      await User.updateOne(
+        { _id: userID },
+        { $set: { password: hashedPassword, resetPasswordLink: '' } }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Password reset',
+      });
+    }
+  );
+};
+
+// export const testEmail = async (req, res) => {
+//   const { email } = req.body;
+
+//   console.log(email);
+
+//   // HTML Message
+//   const message = `
+//   <h1>You have requested a password reset</h1>
+//   <p>Please make a put request to the following link:</p>
+// `;
+//   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+//   try {
+//     await sendEmail({
+//       to: email,
+//       subject: 'Password Reset Request',
+//       text: message,
+//     });
+
+//     res.status(200).json({ success: true, data: 'Email Sent' });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
