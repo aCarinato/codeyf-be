@@ -79,6 +79,8 @@ export const signup = async (req, res) => {
     </head>
     <body>
       <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+        <h1>codeyful</h1>
+        <br></br>
         <p>Hi ${username}!</p>
         <p>Please click on the link below to verify your identity:</p>
         <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Confirm Account</a>
@@ -87,7 +89,7 @@ export const signup = async (req, res) => {
         <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
         <br></br>
         <p>If you do not click the verification link your account will not be activated.</p>
-        <p>The link will expire in 7 days. If you try to activate after that time you need to re register (you can use the same credentials)</p>
+        <p>The link will expire in 7 days. If you try to activate after that time you will need to repeat the sign up procedure (you can use the same credentials)</p>
       </div>
     </body>
   </html>
@@ -111,6 +113,8 @@ export const signup = async (req, res) => {
           <p>If you do not click the verification link your account <span className="submit-success-msg">will not be activated.</span></p>
           <br></br>
           <p>Please note the link <span className="submit-success-msg">will expire in 7 days.</span></p>
+          <br></br>
+          <p>Please make sure to <span className="submit-success-msg">check your spam and trash</span> if you can't find the email</p>
         </div>
         `,
     });
@@ -243,6 +247,12 @@ export const forgotPassword = async (req, res) => {
     res.status(500).json(err);
   }
 
+  // if (existingUser.resetPasswordLink !== '') {
+  //   return res.json({
+  //     error: `The link has already been sent to ${email}. Please make sure to check your spam and trash if you can't find the email`,
+  //   });
+  // }
+
   if (!existingUser) {
     return res.json({
       error:
@@ -259,10 +269,29 @@ export const forgotPassword = async (req, res) => {
   // console.log(userID);
   await User.updateOne({ _id: userID }, { $set: { resetPasswordLink: token } });
   const message = `
-  <p>Please verify your email address through thil link:</p>
-  <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Link</a>
-  <br></br>
-  <p>The link will expire in 24 hours. If you try to reset after that time you need to repeat the procedure</p>`;
+    <html lang="en">
+      <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+        </head>
+        <body>
+          <h1>codeyful</h1>
+          <br></br>
+          <p>Hi ${existingUser.username},</p>
+          <br></br>
+          <p>A password reset for your account was requested.</p>
+          <p>Please click the link below to change your password.</p>
+          <br></br>
+          <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Change your password</a>
+          <br></br>
+          <p>Note that this link is valid for 24 hours. After the time limit has expired, you will have to resubmit the request for a password reset.</p>
+        </body>
+      </div>
+    </html>
+    `;
+
   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
   try {
     await sendEmail({
