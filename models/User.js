@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    isProfileCompleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     isBuddy: {
       type: Boolean,
       // required: true,

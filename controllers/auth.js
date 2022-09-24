@@ -79,17 +79,20 @@ export const signup = async (req, res) => {
     </head>
     <body>
       <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
-        <h1>codeyful</h1>
-        <br></br>
-        <p>Hi ${username}!</p>
-        <p>Please click on the link below to verify your identity:</p>
-        <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Confirm Account</a>
-        <br></br>
-        <p>Or copy and paste the following link in your browser</p>
-        <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
-        <br></br>
-        <p>If you do not click the verification link your account will not be activated.</p>
-        <p>The link will expire in 7 days. If you try to activate after that time you will need to repeat the sign up procedure (you can use the same credentials)</p>
+        <div style="width: 350px; margin: 0 auto">
+          <div style="text-align: center;" >
+            <h2 style="color: rgb(13, 0, 134);">codeyful</h2>
+          </div>     
+          <p>Hi ${username}!</p>
+          <p>Please click on the link below to verify your identity:</p>
+          <a href='${process.env.CLIENT_URL}/login/activate/${token}' clicktracking=off>Confirm Account</a>
+          <br></br>
+          <p>Or copy and paste the following link in your browser</p>
+          <p>${process.env.CLIENT_URL}/login/activate/${token}</p>
+          <br></br>
+          <p>If you do not click the verification link your account will not be activated.</p>
+          <p>The link will expire in 7 days. If you try to activate after that time you will need to repeat the sign up procedure (you can use the same credentials)</p>
+        </div>
       </div>
     </body>
   </html>
@@ -270,25 +273,29 @@ export const forgotPassword = async (req, res) => {
   await User.updateOne({ _id: userID }, { $set: { resetPasswordLink: token } });
   const message = `
     <html lang="en">
-      <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+      
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
         </head>
         <body>
-          <h1>codeyful</h1>
-          <br></br>
-          <p>Hi ${existingUser.username},</p>
-          <br></br>
-          <p>A password reset for your account was requested.</p>
-          <p>Please click the link below to change your password.</p>
-          <br></br>
-          <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Change your password</a>
-          <br></br>
-          <p>Note that this link is valid for 24 hours. After the time limit has expired, you will have to resubmit the request for a password reset.</p>
+          <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
+            <div style="width: 350px; background-color: #fff; margin: 12px auto padding: 0.8rem">
+              <div style="text-align: center;" >
+                <h2 style="color: rgb(13, 0, 134);">codeyful</h2>
+              </div>     
+              <p>Hi ${existingUser.username},</p>
+              <br></br>
+              <p>A password reset for your account was requested.</p>
+              <p>Please click the link below to change your password.</p>
+              <br></br>
+              <a href='${process.env.CLIENT_URL}/login/password/${token}' clicktracking=off>Change your password</a>
+              <br></br>
+              <p>Note that this link is valid for 24 hours. After the time limit has expired, you will have to resubmit the request for a password reset.</p>
+            </div>
+          </div>
         </body>
-      </div>
     </html>
     `;
 
@@ -368,26 +375,77 @@ export const resetPassword = (req, res) => {
   );
 };
 
-// export const testEmail = async (req, res) => {
-//   const { email } = req.body;
+// @desc    Login user
+// @route   POST /api/auth/login
+// @access  Public
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-//   console.log(email);
+  // console.log(req.body);
 
-//   // HTML Message
-//   const message = `
-//   <h1>You have requested a password reset</h1>
-//   <p>Please make a put request to the following link:</p>
-// `;
-//   //   <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
-//   try {
-//     await sendEmail({
-//       to: email,
-//       subject: 'Password Reset Request',
-//       text: message,
-//     });
+  // res.json({ message: 'Grintaaa' });
+  let existingUser;
 
-//     res.status(200).json({ success: true, data: 'Email Sent' });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+  try {
+    existingUser = await User.findOne({ email: email });
+    // res.status(200).json(existingUser);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+
+  if (!existingUser) {
+    // this becomes res.data.error in the frontend
+    return res.json({
+      error: 'User not found. Please double check entered email.',
+    });
+  }
+
+  let isValidPassword;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+
+  if (!isValidPassword) {
+    return res.json({
+      error: 'Password incorrect',
+    });
+  }
+
+  let token;
+  token = jwt.sign(
+    { _id: existingUser._id, email: existingUser.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.status(201).json({
+    success: true,
+    loginUser: {
+      username: existingUser.username,
+      userId: existingUser._id,
+      email: existingUser.email,
+      isAdmin: existingUser.isAdmin,
+      token: token,
+    },
+  });
+};
+
+// @desc    Get the current user to protect routes
+// @route   GET /api/auth/current-user
+// @access  Private
+export const currentUser = async (req, res) => {
+  try {
+    // IF YOU USE THE expressjwt middleware:
+    // const user = await User.findById(req.auth._id);
+
+    // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
+    const user = await User.findById(req.user._id);
+    // res.json(user);
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+};
