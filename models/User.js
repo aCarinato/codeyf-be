@@ -21,10 +21,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    isProfileCompleted: {
+    registrationCompleted: {
       type: Boolean,
       required: true,
       default: false,
+    },
+    currentlyAvailable: {
+      type: Boolean,
+      default: true,
     },
     isBuddy: {
       type: Boolean,
@@ -44,22 +48,31 @@ const userSchema = new mongoose.Schema(
     country: {
       type: String,
     },
+    languages: {
+      type: Array,
+    },
     shortDescription: {
       type: String,
       // required: true,
       // minlength: 6,
     },
-    // longDescription: {
-    //   type: String,
-    //   //   required: true,
-    //   // minlength: 6,
-    // },
-    // interests: {
-    //   // array with id of interests
-    //   type: [String],
-    //   // required: true,
-    //   // minlength: 6,
-    // },
+    longDescription: {
+      type: String,
+      //   required: true,
+      // minlength: 6,
+    },
+    topics: {
+      type: Array,
+    },
+    learning: {
+      type: Array,
+    },
+    teaching: {
+      type: Array,
+    },
+    skillsLevel: {
+      type: Array,
+    },
   },
   {
     timestamps: true,
