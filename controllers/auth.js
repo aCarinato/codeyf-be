@@ -318,7 +318,7 @@ export const forgotPassword = async (req, res) => {
 // @desc    Reset password
 // @route   PUT /api/auth/reset-password
 // @access  Public
-export const resetPassword = (req, res) => {
+export const resetPassword = async (req, res) => {
   const { resetPasswordLink, newPassword } = req.body;
 
   if (!resetPasswordLink) {
@@ -443,7 +443,7 @@ export const currentUser = async (req, res) => {
     // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
     const user = await User.findById(req.user._id);
     // res.json(user);
-    res.json({ ok: true });
+    res.json({ ok: true, user: user });
   } catch (err) {
     console.log(err);
     res.sendStatus(400);
