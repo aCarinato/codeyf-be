@@ -43,6 +43,7 @@ export const signup = async (req, res) => {
 
   if (existingUser) {
     return res.json({
+      errorType: 'username',
       error: 'Username already in use. Please try with another one.',
     });
   }
@@ -55,7 +56,8 @@ export const signup = async (req, res) => {
 
   if (existingUser) {
     return res.json({
-      error: 'Email already in use. Please try with another one.',
+      errorType: 'email',
+      error: 'Invalid email. Please try with another one.',
     });
   }
 
@@ -396,7 +398,7 @@ export const login = async (req, res) => {
   if (!existingUser) {
     // this becomes res.data.error in the frontend
     return res.json({
-      error: 'User not found. Please double check entered email.',
+      error: 'The email address or password you entered is incorrect',
     });
   }
 
@@ -409,7 +411,7 @@ export const login = async (req, res) => {
 
   if (!isValidPassword) {
     return res.json({
-      error: 'Password incorrect',
+      error: 'The email address or password you entered is incorrect',
     });
   }
 
