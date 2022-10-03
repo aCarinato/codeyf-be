@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    mentorPendingApproval: {
+      type: Boolean,
+      default: false,
+    },
     currentlyAvailable: {
       type: Boolean,
       default: true,
@@ -45,6 +49,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+
     country: {
       type: String,
     },
@@ -67,10 +72,19 @@ const userSchema = new mongoose.Schema(
     learning: {
       type: Array,
     },
-    teaching: {
+    skillsLevel: {
       type: Array,
     },
-    skillsLevel: {
+    companyJob: {
+      type: Boolean,
+    },
+    yearsExperience: {
+      type: Number,
+    },
+    linkedin: {
+      type: String,
+    },
+    teaching: {
       type: Array,
     },
   },

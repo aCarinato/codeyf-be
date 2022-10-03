@@ -13,6 +13,9 @@ export const completeProfile = async (req, res) => {
     topics,
     learning,
     teaching,
+    yearsExperience,
+    companyJob,
+    linkedin,
     skillsLevel,
   } = req.body;
 
@@ -43,6 +46,10 @@ export const completeProfile = async (req, res) => {
           learning: learning,
           teaching: teaching,
           skillsLevel: skillsLevel,
+          yearsExperience,
+          companyJob,
+          linkedin,
+          mentorPendingApproval: true,
         },
       }
     );
