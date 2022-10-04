@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import people from './routes/people.js';
 import auth from './routes/auth.js';
 import user from './routes/user.js';
+import admin from './routes/admin.js';
 
 connectDB();
 
@@ -32,5 +33,6 @@ app.use((req, res, next) => {
 app.use('/api/people', people);
 app.use('/api/auth', auth);
 app.use('/api/user', user);
+app.use('/api/admin', admin);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
