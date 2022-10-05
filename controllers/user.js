@@ -1,5 +1,24 @@
 import User from '../models/User.js';
 
+// @desc    Get user by email
+// @route   POST /api/user/
+// @access  Private
+export const getUser = async (req, res) => {
+  const { email } = req.body;
+
+  let user;
+
+  try {
+    user = await User.findOne({ email: email });
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (user) {
+    res.status(200).json({ success: true, user: user });
+  }
+};
+
 // @desc    Completing user's profile
 // @route   PUT /api/user/complete-profile
 // @access  Private
@@ -71,5 +90,31 @@ export const deleteProfile = async (req, res) => {
     res.json({ success: true, message: 'profile deleted' });
   } catch (err) {
     console.log(err);
+  }
+};
+
+// @desc    Read notifications
+// @route   PUT /api/user/read-notifications
+// @access  Private
+export const readNotifications = async (req, res) => {
+  let user;
+  try {
+    user = await User.findById(req.user._id);
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (user) {
+    const userID = user._id;
+    await User.updateOne(
+      { _id: userID },
+      {
+        $set: {
+          hasNotifications: false,
+        },
+      }
+    );
+
+    res.status(200).json({ success: true });
   }
 };

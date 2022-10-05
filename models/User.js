@@ -5,7 +5,10 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      // unique: true,
+      unique: true,
+    },
+    handle: {
+      type: String,
     },
     email: {
       type: String,
@@ -24,6 +27,10 @@ const userSchema = new mongoose.Schema(
     registrationCompleted: {
       type: Boolean,
       required: true,
+      default: false,
+    },
+    hasNotifications: {
+      type: Boolean,
       default: false,
     },
     mentorPendingApproval: {
@@ -86,6 +93,10 @@ const userSchema = new mongoose.Schema(
     },
     teaching: {
       type: Array,
+    },
+    notifications: {
+      type: Array,
+      default: [],
     },
   },
   {
