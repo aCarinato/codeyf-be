@@ -38,6 +38,15 @@ export const completeProfile = async (req, res) => {
     skillsLevel,
   } = req.body;
 
+  let replacedCompanyJob;
+  let mentorPendingApproval;
+  if (companyJob === null) {
+    replacedCompanyJob = false;
+    mentorPendingApproval = false;
+  } else {
+    replacedCompanyJob = companyJob;
+    mentorPendingApproval = true;
+  }
   // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
   // const user = await User.findById(req.user._id);
   // console.log(user);
@@ -66,10 +75,13 @@ export const completeProfile = async (req, res) => {
           teaching: teaching,
           skillsLevel: skillsLevel,
           yearsExperience,
-          companyJob,
+          replacedCompanyJob,
           linkedin,
-          mentorPendingApproval: true,
         },
+        // $push: {
+        //   notifications:
+        //     'Congratulations, your request to be a mentor was approved!',
+        // },
       }
     );
 
