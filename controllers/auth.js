@@ -218,10 +218,13 @@ export const activateAccount = async (req, res) => {
         res.status(500).json(err);
       }
 
+      const handle = username.replace(/ /g, '');
+
       const createdUser = new User({
         username,
         email,
         password: hashedPassword,
+        handle,
       });
       // console.log(createdUser);
       const newUser = await createdUser.save();

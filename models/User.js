@@ -5,7 +5,10 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      // unique: true,
+      unique: true,
+    },
+    handle: {
+      type: String,
     },
     email: {
       type: String,
@@ -26,14 +29,15 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    hasNotifications: {
+      type: Boolean,
+      default: false,
+    },
     mentorPendingApproval: {
       type: Boolean,
       default: false,
     },
-    currentlyAvailable: {
-      type: Boolean,
-      default: true,
-    },
+
     isBuddy: {
       type: Boolean,
       // required: true,
@@ -43,6 +47,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       // required: true,
       default: false,
+    },
+    currentlyAvailableAsBuddy: {
+      type: Boolean,
+      default: true,
+    },
+    currentlyAvailableAsMentor: {
+      type: Boolean,
+      default: true,
     },
     isAdmin: {
       type: Boolean,
@@ -86,6 +98,10 @@ const userSchema = new mongoose.Schema(
     },
     teaching: {
       type: Array,
+    },
+    notifications: {
+      type: Array,
+      default: [],
     },
   },
   {

@@ -1,5 +1,24 @@
 import User from '../models/User.js';
 
+// @desc    Get user by email
+// @route   POST /api/user/
+// @access  Private
+export const getUser = async (req, res) => {
+  const { email } = req.body;
+
+  let user;
+
+  try {
+    user = await User.findOne({ email: email });
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (user) {
+    res.status(200).json({ success: true, user: user });
+  }
+};
+
 // @desc    Completing user's profile
 // @route   PUT /api/user/complete-profile
 // @access  Private
@@ -10,6 +29,7 @@ export const completeProfile = async (req, res) => {
     country,
     languages,
     availability,
+    mentorPendingApproval,
     topics,
     learning,
     teaching,
@@ -19,6 +39,15 @@ export const completeProfile = async (req, res) => {
     skillsLevel,
   } = req.body;
 
+  let replacedCompanyJob;
+  // let mentorPendingApproval;
+  if (companyJob === null) {
+    replacedCompanyJob = false;
+    // mentorPendingApproval = false;
+  } else {
+    replacedCompanyJob = companyJob;
+    // mentorPendingApproval = true;
+  }
   // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
   // const user = await User.findById(req.user._id);
   // console.log(user);
@@ -42,15 +71,20 @@ export const completeProfile = async (req, res) => {
           languages: languages,
           topics: topics,
           isBuddy: availability[0],
-          isMentor: availability[1],
+          // the following will become true if the mentor request will be approved
+          isMentor: false,
+          mentorPendingApproval,
           learning: learning,
           teaching: teaching,
           skillsLevel: skillsLevel,
           yearsExperience,
-          companyJob,
+          replacedCompanyJob,
           linkedin,
-          mentorPendingApproval: true,
         },
+        // $push: {
+        //   notifications:
+        //     'Congratulations, your request to be a mentor was approved!',
+        // },
       }
     );
 
@@ -71,5 +105,31 @@ export const deleteProfile = async (req, res) => {
     res.json({ success: true, message: 'profile deleted' });
   } catch (err) {
     console.log(err);
+  }
+};
+
+// @desc    Read notifications
+// @route   PUT /api/user/read-notifications
+// @access  Private
+export const readNotifications = async (req, res) => {
+  let user;
+  try {
+    user = await User.findById(req.user._id);
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (user) {
+    const userID = user._id;
+    await User.updateOne(
+      { _id: userID },
+      {
+        $set: {
+          hasNotifications: false,
+        },
+      }
+    );
+
+    res.status(200).json({ success: true });
   }
 };

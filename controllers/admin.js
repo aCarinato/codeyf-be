@@ -28,7 +28,7 @@ export const currentUserIsAdmin = async (req, res) => {
 // @access  Private
 export const createUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, handle } = req.body;
 
     // console.log(req.body);
 
@@ -43,6 +43,7 @@ export const createUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      handle,
     });
     // console.log(createdUser);
     const newUser = await createdUser.save();
@@ -74,8 +75,29 @@ export const approveMentorRequest = async (req, res) => {
     // const requestedUser = await User.findById(id)
     await User.updateOne(
       { _id: id },
-      { $set: { mentorPendingApproval: false, isMentor: true } }
+      {
+        $set: {
+          mentorPendingApproval: false,
+          isMentor: true,
+          hasNotifications: true,
+        },
+        $push: {
+          notifications:
+            'Congratulations, your request to be a mentor was approved!',
+        },
+      }
     );
+
+    // await User.updateOne(
+    //   { _id: id },
+    //   {
+    //     $push: {
+    //       notifications:
+    //         'Congratulations, your request to be a mentor was approved!',
+    //     },
+    //   }
+    // );
+
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
