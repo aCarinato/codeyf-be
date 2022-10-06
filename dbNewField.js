@@ -13,8 +13,7 @@ const addField = async () => {
       {},
       {
         $set: {
-          currentlyAvailableAsBuddy: true,
-          currentlyAvailableAsMentor: true,
+          github: '',
         },
       }
     );

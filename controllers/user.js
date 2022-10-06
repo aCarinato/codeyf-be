@@ -1,4 +1,11 @@
 import User from '../models/User.js';
+import cloudinary from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
 // @desc    Get user by email
 // @route   POST /api/user/
@@ -36,7 +43,9 @@ export const completeProfile = async (req, res) => {
     yearsExperience,
     companyJob,
     linkedin,
+    github,
     skillsLevel,
+    image,
   } = req.body;
 
   let replacedCompanyJob;
@@ -80,6 +89,8 @@ export const completeProfile = async (req, res) => {
           yearsExperience,
           replacedCompanyJob,
           linkedin,
+          github,
+          profilePic: image,
         },
         // $push: {
         //   notifications:
@@ -131,5 +142,18 @@ export const readNotifications = async (req, res) => {
     );
 
     res.status(200).json({ success: true });
+  }
+};
+
+export const uploadImage = async (req, res) => {
+  console.log('req files => ', req.files);
+  try {
+    const result = await cloudinary.uploader.upload(req.files.image.path);
+    res.json({
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
+  } catch (err) {
+    console.log(`Error in the API: ${err}`);
   }
 };

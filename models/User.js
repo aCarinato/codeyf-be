@@ -37,7 +37,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    profilePic: {
+      url: String,
+      public_id: String,
+    },
     isBuddy: {
       type: Boolean,
       // required: true,
@@ -94,6 +97,9 @@ const userSchema = new mongoose.Schema(
       type: Number,
     },
     linkedin: {
+      type: String,
+    },
+    github: {
       type: String,
     },
     teaching: {
