@@ -29,6 +29,7 @@ export const completeProfile = async (req, res) => {
     country,
     languages,
     availability,
+    mentorPendingApproval,
     topics,
     learning,
     teaching,
@@ -39,13 +40,13 @@ export const completeProfile = async (req, res) => {
   } = req.body;
 
   let replacedCompanyJob;
-  let mentorPendingApproval;
+  // let mentorPendingApproval;
   if (companyJob === null) {
     replacedCompanyJob = false;
-    mentorPendingApproval = false;
+    // mentorPendingApproval = false;
   } else {
     replacedCompanyJob = companyJob;
-    mentorPendingApproval = true;
+    // mentorPendingApproval = true;
   }
   // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
   // const user = await User.findById(req.user._id);
@@ -70,7 +71,9 @@ export const completeProfile = async (req, res) => {
           languages: languages,
           topics: topics,
           isBuddy: availability[0],
-          isMentor: availability[1],
+          // the following will become true if the mentor request will be approved
+          isMentor: false,
+          mentorPendingApproval,
           learning: learning,
           teaching: teaching,
           skillsLevel: skillsLevel,

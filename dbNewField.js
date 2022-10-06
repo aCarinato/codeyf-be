@@ -9,7 +9,15 @@ const addField = async () => {
     // await User.aggregate([
     //   { $addFields: { testField: { type: String, default: 'testone' } } },
     // ]);
-    await User.updateMany({}, { $set: { notifications: [] } });
+    await User.updateMany(
+      {},
+      {
+        $set: {
+          currentlyAvailableAsBuddy: true,
+          currentlyAvailableAsMentor: true,
+        },
+      }
+    );
     // await User.updateMany({}, { newField: 'sucaa' });
     // await User.aggregate([{ $addFields: { testField: 'testaa' } }]);
     // await User.updateOne(

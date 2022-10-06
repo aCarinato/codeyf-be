@@ -37,10 +37,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    currentlyAvailable: {
-      type: Boolean,
-      default: true,
-    },
+
     isBuddy: {
       type: Boolean,
       // required: true,
@@ -50,6 +47,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       // required: true,
       default: false,
+    },
+    currentlyAvailableAsBuddy: {
+      type: Boolean,
+      default: true,
+    },
+    currentlyAvailableAsMentor: {
+      type: Boolean,
+      default: true,
     },
     isAdmin: {
       type: Boolean,
