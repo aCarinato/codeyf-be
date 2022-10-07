@@ -1,8 +1,22 @@
 import User from '../models/User.js';
 
-export const getPeople = (req, res) => {
+// export const getPeople = (req, res) => {
+//   try {
+//     res.json({ message: 'Hello from the server!' });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+export const getBuddies = async (req, res) => {
   try {
-    res.json({ message: 'Hello from the server!' });
+    const buddies = await User.find({ isBuddy: true });
+
+    if (buddies) {
+      res.status(200).json({ success: true, buddies });
+    } else {
+      res.status(200).json({ success: false, message: 'Buddies not found' });
+    }
   } catch (err) {
     console.log(err);
   }
