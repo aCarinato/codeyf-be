@@ -1,4 +1,5 @@
 import User from './models/User.js';
+import Conversation from './models/Conversation.js';
 
 import connectDB from './config/db.js';
 
@@ -9,11 +10,19 @@ const addField = async () => {
     // await User.aggregate([
     //   { $addFields: { testField: { type: String, default: 'testone' } } },
     // ]);
-    await User.updateMany(
+    // await User.updateMany(
+    //   {},
+    //   {
+    //     $set: {
+    //       conversations: [],
+    //     },
+    //   }
+    // );
+    await Conversation.updateMany(
       {},
       {
         $set: {
-          github: '',
+          lastMessageIsRead: false,
         },
       }
     );

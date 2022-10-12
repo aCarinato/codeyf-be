@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
@@ -108,6 +109,10 @@ const userSchema = new mongoose.Schema(
     notifications: {
       type: Array,
       default: [],
+    },
+    conversations: {
+      type: [ObjectId],
+      ref: 'Conversation',
     },
   },
   {
