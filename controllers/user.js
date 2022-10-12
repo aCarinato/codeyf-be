@@ -146,7 +146,7 @@ export const readNotifications = async (req, res) => {
 };
 
 export const uploadImage = async (req, res) => {
-  console.log('req files => ', req.files);
+  // console.log('req files => ', req.files);
   try {
     const result = await cloudinary.uploader.upload(req.files.image.path);
     res.json({

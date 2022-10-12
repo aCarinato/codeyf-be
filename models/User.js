@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
@@ -32,6 +33,10 @@ const userSchema = new mongoose.Schema(
     hasNotifications: {
       type: Boolean,
       default: false,
+    },
+    nNotifications: {
+      type: Number,
+      default: 0,
     },
     mentorPendingApproval: {
       type: Boolean,
@@ -108,6 +113,10 @@ const userSchema = new mongoose.Schema(
     notifications: {
       type: Array,
       default: [],
+    },
+    conversations: {
+      type: [ObjectId],
+      ref: 'Conversation',
     },
   },
   {
