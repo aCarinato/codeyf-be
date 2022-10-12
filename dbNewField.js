@@ -15,6 +15,7 @@ const addField = async () => {
       {
         $set: {
           nNotifications: 0,
+          conversations: [],
         },
       }
     );
