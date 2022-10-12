@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    nNotifications: {
+      type: Number,
+      default: 0,
+    },
     mentorPendingApproval: {
       type: Boolean,
       default: false,

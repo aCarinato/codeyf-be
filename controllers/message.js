@@ -52,9 +52,10 @@ export const startConversation = async (req, res) => {
         $push: {
           conversations: createdConversation,
         },
-        $set: {
-          hasNotifications: true,
-        },
+        $inc: { nNotifications: 1 },
+        // $set: {
+        //   hasNotifications: true,
+        // },
       }
     );
 
@@ -112,12 +113,28 @@ export const readLastMsg = async (req, res) => {
     }
 
     if (conversation) {
+      const user = await User.findById(req.user._id);
+
+      if (user.nNotifications > 0 && conversation.lastMessageIsRead === false) {
+        await User.updateOne(
+          { _id: req.user._id },
+          { $inc: { nNotifications: -1 } }
+          // { $set: { nNotifications: nNotifications - 1 } }
+        );
+      }
+
       await Conversation.updateOne(
         { _id: _id },
         { $set: { lastMessageIsRead: true } }
       );
 
-      res.status(200).json({ success: true });
+      // updated user to send as a response
+      const userResponse = await User.findById(req.user._id);
+      // console.log(userResponse);
+
+      res
+        .status(200)
+        .json({ success: true, nNotifications: userResponse.nNotifications });
     }
   } catch (err) {
     console.log(err);

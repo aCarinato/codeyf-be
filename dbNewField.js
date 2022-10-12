@@ -10,22 +10,24 @@ const addField = async () => {
     // await User.aggregate([
     //   { $addFields: { testField: { type: String, default: 'testone' } } },
     // ]);
-    // await User.updateMany(
-    //   {},
-    //   {
-    //     $set: {
-    //       conversations: [],
-    //     },
-    //   }
-    // );
-    await Conversation.updateMany(
+    await User.updateMany(
       {},
       {
         $set: {
-          lastMessageIsRead: false,
+          nNotifications: 0,
         },
       }
     );
+    // ----------------------------------- //
+    // await Conversation.updateMany(
+    //   {},
+    //   {
+    //     $set: {
+    //       lastMessageIsRead: false,
+    //     },
+    //   }
+    // );
+    // ----------------------------------- //
     // await User.updateMany({}, { newField: 'sucaa' });
     // await User.aggregate([{ $addFields: { testField: 'testaa' } }]);
     // await User.updateOne(
