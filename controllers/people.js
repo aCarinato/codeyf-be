@@ -13,7 +13,11 @@ import User from '../models/User.js';
 // @access  Public
 export const getBuddies = async (req, res) => {
   try {
-    const buddies = await User.find({ isBuddy: true });
+    const { userEmail } = req.body;
+    const buddies = await User.find({
+      isBuddy: true,
+      email: { $ne: userEmail },
+    });
 
     if (buddies) {
       res.status(200).json({ success: true, buddies });
@@ -30,7 +34,11 @@ export const getBuddies = async (req, res) => {
 // @access  Public
 export const getMentors = async (req, res) => {
   try {
-    const mentors = await User.find({ isMentor: true });
+    const { userEmail } = req.body;
+    const mentors = await User.find({
+      isMentor: true,
+      email: { $ne: userEmail },
+    });
 
     if (mentors) {
       res.status(200).json({ success: true, mentors });
