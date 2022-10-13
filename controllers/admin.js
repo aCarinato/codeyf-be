@@ -85,6 +85,7 @@ export const approveMentorRequest = async (req, res) => {
           notifications:
             'Congratulations, your request to be a mentor was approved!',
         },
+        $inc: { nNotifications: 1 },
       }
     );
 

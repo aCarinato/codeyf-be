@@ -10,8 +10,8 @@ import {
 } from '../controllers/people.js';
 import { requireSignin } from '../middlewares/checkAuth.js';
 
-router.get('/buddies', getBuddies);
-router.get('/mentors', getMentors);
+router.post('/buddies', getBuddies);
+router.post('/mentors', getMentors);
 router.get('/student/:handle', getStudent);
 router.get('/mentor/:handle', getMentor);
 
