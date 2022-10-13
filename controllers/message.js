@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
+import AdminNotification from '../models/AdminNotification.js';
 
 // @desc    Send a message
 // @route   POST /api/message/start-conversation
@@ -136,6 +137,67 @@ export const readLastMsg = async (req, res) => {
         .status(200)
         .json({ success: true, nNotifications: userResponse.nNotifications });
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+// @desc    Read an admin notification so it is not highlighted as 'unread' anymore (in the FE)
+// @route   PUT /api/message/read-notification
+// @access  Private
+export const readAdminNotification = async (req, res) => {
+  try {
+    // find the notification with specified id
+    // console.log(req.body);
+    const { notificationId } = req.body;
+    // let notification;
+
+    // notification = await AdminNotification.findById(notificationId);
+
+    // if (notification.isRead === false) {
+    await AdminNotification.updateOne(
+      { _id: notificationId },
+      { $set: { isRead: true } }
+    );
+
+    // update the number of notifications of the user
+    await User.updateOne(
+      { _id: req.user._id },
+      { $inc: { nNotifications: -1 } }
+    );
+
+    // updated user to send as a response
+    const userResponse = await User.findById(req.user._id);
+
+    res
+      .status(200)
+      .json({ success: true, nNotifications: userResponse.nNotifications });
+    // }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+// @desc    Get all admin notifications for the user
+// @route   POST /api/message/render-notifications
+// @access  Private
+// @refs    https://dev.to/paras594/how-to-use-populate-in-mongoose-node-js-mo0
+export const renderAdminNotifications = async (req, res) => {
+  try {
+    const notifications = await AdminNotification.find({
+      recipient: req.user._id,
+    }).sort({
+      updatedAt: -1,
+    });
+
+    // console.log(notifications);
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

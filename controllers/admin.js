@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import AdminNotification from '../models/AdminNotification.js';
 import bcrypt from 'bcryptjs';
 
 // @desc    Is the current user an admin?
@@ -71,8 +72,17 @@ export const mentorApproval = async (req, res) => {
 // @access  Private (admin)
 export const approveMentorRequest = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.body; // id of the user that is asking to be mentor
     // const requestedUser = await User.findById(id)
+
+    const createdNotification = new AdminNotification({
+      recipient: id,
+      isRead: false,
+      message: 'Congratulations, your request to be a mentor was approved!',
+    });
+
+    await createdNotification.save();
+
     await User.updateOne(
       { _id: id },
       {
@@ -82,22 +92,11 @@ export const approveMentorRequest = async (req, res) => {
           hasNotifications: true,
         },
         $push: {
-          notifications:
-            'Congratulations, your request to be a mentor was approved!',
+          notifications: createdNotification,
         },
         $inc: { nNotifications: 1 },
       }
     );
-
-    // await User.updateOne(
-    //   { _id: id },
-    //   {
-    //     $push: {
-    //       notifications:
-    //         'Congratulations, your request to be a mentor was approved!',
-    //     },
-    //   }
-    // );
 
     res.status(200).json({ success: true });
   } catch (err) {
@@ -112,9 +111,29 @@ export const rejectMentorRequest = async (req, res) => {
   try {
     const { id } = req.body;
     // const requestedUser = await User.findById(id)
+
+    const createdNotification = new AdminNotification({
+      recipient: id,
+      isRead: false,
+      message:
+        'We regret to inform you that your request to be a mentor was not approved!',
+    });
+
+    await createdNotification.save();
+
     await User.updateOne(
       { _id: id },
-      { $set: { mentorPendingApproval: false, isMentor: false } }
+      {
+        $set: {
+          mentorPendingApproval: false,
+          isMentor: false,
+          hasNotifications: true,
+        },
+        $push: {
+          notifications: createdNotification,
+        },
+        $inc: { nNotifications: 1 },
+      }
     );
     res.status(200).json({ success: true });
   } catch (err) {
