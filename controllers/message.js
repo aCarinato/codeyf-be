@@ -203,3 +203,117 @@ export const renderAdminNotifications = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+// @desc    Fetch a conversation given its _id
+// @route   GET /api/message/render-conversation:_id
+// @access  Private
+export const renderConversation = async (req, res) => {
+  try {
+    const conversationId = req.params._id;
+
+    const conversation = await Conversation.findOne({
+      _id: conversationId,
+    })
+      .populate('firstUser secondUser messages')
+      .populate({
+        path: 'messages',
+        populate: { path: 'from to' },
+      })
+      //   .populate('firstUser secondUser messages')
+      .sort({
+        updatedAt: -1,
+      });
+
+    res.status(200).json({
+      success: true,
+      conversation,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+// @desc    Send a message in a PM conversation (between 2 users) after a converstion has already started
+// @route   POST /api/message/send-dm-msg
+// @access  Private
+export const sendDMMessage = async (req, res) => {
+  console.log(req.body);
+  //   console.log(req.user._id);
+  try {
+    const { conversationId, recipientId, newMessage } = req.body;
+
+    // find sender
+    // const sender = await User.findById(req.user._id);
+    // const senderUserId = sender._id;
+
+    // find conversation
+    // const conversation = await Conversation.findById({ _id: conversationId });
+
+    //   find the id of the recipient
+    // const recipientUser = await User.findOne({ username: recipient });
+    // const recipientUserId = recipientUser._id;
+
+    //   create a new message
+    const createdMessage = new Message({
+      from: req.user._id,
+      to: recipientId,
+      content: newMessage,
+    });
+
+    const newMsg = await createdMessage.save();
+
+    await Conversation.updateOne(
+      { _id: conversationId },
+      {
+        $set: { lastMessageIsRead: false },
+        $push: { messages: createdMessage },
+      }
+    );
+
+    // notify the recipient
+    await User.updateOne(
+      { _id: recipientId },
+      {
+        $inc: { nNotifications: 1 },
+      }
+    );
+
+    // const createdConversation = new Conversation({
+    //   lastMessageIsRead: false,
+    //   firstUser: senderUserId,
+    //   secondUser: recipientUserId,
+    //   messages: createdMessage,
+    // });
+
+    // const newConversation = await createdConversation.save();
+
+    // await User.updateOne(
+    //   { _id: sender._id },
+    //   {
+    //     $push: {
+    //       conversations: createdConversation,
+    //     },
+    //   }
+    // );
+
+    // await User.updateOne(
+    //   { _id: recipientUserId },
+    //   {
+    //     $push: {
+    //       conversations: createdConversation,
+    //     },
+    //     $inc: { nNotifications: 1 },
+    //   }
+    // );
+
+    res.status(200).json({
+      success: true,
+      //   newMsg: createdMessage,
+      //   newConversation: createdConversation,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
