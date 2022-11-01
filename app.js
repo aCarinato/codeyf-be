@@ -1,7 +1,27 @@
 import express from 'express';
 import 'dotenv/config';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 import connectDB from './config/db.js';
+
+// SOCKET CONTROLLERS
+// socket controllers
+import {
+  getUsers,
+  addUser,
+  removeUserOnLeave,
+  removeUser,
+  findConnectedUser,
+} from './controllers/socket/room.js';
+
+import {
+  loadMessages,
+  sendMsg,
+  setMsgToUnread,
+  setNotification,
+  readNotification,
+} from './controllers/socket/messages.js';
 
 // ROUTES
 import people from './routes/people.js';
@@ -9,10 +29,97 @@ import auth from './routes/auth.js';
 import user from './routes/user.js';
 import admin from './routes/admin.js';
 import message from './routes/message.js';
+import chats from './routes/chats.js';
 
 connectDB();
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: '*' } }); // TEST socket on vercel
+
+io.on('connection', (socket) => {
+  // console.log(`socket id: ${socket.id}`);
+
+  socket.on('join', async ({ userId }) => {
+    // console.log(`suser id: ${userId}`);
+    const users = await addUser(userId, socket.id);
+
+    setInterval(() => {
+      // filter out the current user
+      socket.emit('connectedUsers', {
+        users: users.filter((user) => user.userId !== userId),
+      });
+    }, 10000);
+  });
+
+  socket.on('disconnect', async () => {
+    // console.log('ciao ciao');
+    // const users = await addUser(userId, socket.id);
+    // console.log(socket.id);
+    // socket.disconnect();
+    // console.log('PRIMA');
+    const testone = getUsers();
+    // console.log(testone);
+    const incriminato = testone.filter((user) => user.socketId === socket.id);
+    if (incriminato !== undefined && incriminato.length > 0) {
+      const incriminatoId = incriminato[0].userId;
+      // console.log('incriminato.userId; ', incriminatoId);
+      // console.log('DOPO');
+      const newUsers = await removeUserOnLeave(incriminatoId, socket.id);
+      // const testone2 = getUsers();
+      // console.log(newUsers);
+    }
+  });
+
+  socket.on('loadMessages', async ({ userId, messagesWith }) => {
+    // console.log(
+    //   `FROM SOCKET 'loadMessages' - userId: ${userId}, messagesWith: ${messagesWith}`
+    // );
+    const { chat, error } = await loadMessages(userId, messagesWith);
+
+    !error
+      ? socket.emit('messagesLoaded', { chat })
+      : socket.emit('noChatFound');
+  });
+
+  socket.on('sendNewMsg', async ({ userId, receiverId, msg }) => {
+    // WOULD BE BETTER: socket.on('sendNewMsg', async ({ senderId, receiverId, msg }) => {
+
+    // create a new message and store it in the database for the sender and receiver (Chat.js)
+    const { newMsg, error } = await sendMsg(userId, receiverId, msg);
+
+    // Check if the receiver is online
+    const receiverSocket = findConnectedUser(receiverId);
+    // console.log(receiverSocket);
+
+    if (receiverSocket) {
+      // the receiver is online
+      // WHEN YOU WANT TO SEND MESSAGE TO A PARTICULAR SOCKET
+      io.to(receiverSocket.socketId).emit('newMsgReceived', { newMsg });
+
+      // (maybe) i need to put a notification here when the receiver is not on the router message with the sender
+      // socket.on('newNotification')
+    }
+    //
+    else {
+      await setMsgToUnread(userId, receiverId);
+      await setNotification(userId, receiverId);
+    }
+
+    !error && socket.emit('msgSent', { newMsg });
+    // socket.emit('notificationSent');
+  });
+
+  socket.on('sendNotification', async ({ senderId, receiverId }) => {
+    // console.log(`senderId: ${senderId} receiverId: ${receiverId}`);
+    await setNotification(senderId, receiverId);
+  });
+
+  socket.on('readNotification', async ({ notificationTo, msgFrom }) => {
+    await readNotification(notificationTo, msgFrom);
+  });
+});
+
 const port = process.env.PORT || 8000;
 
 app.use(express.json());
@@ -36,5 +143,6 @@ app.use('/api/auth', auth);
 app.use('/api/user', user);
 app.use('/api/admin', admin);
 app.use('/api/message', message);
+app.use('/api/chats', chats);
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+httpServer.listen(port, () => console.log(`Server running on port ${port}`));
