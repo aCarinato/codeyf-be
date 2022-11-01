@@ -14,6 +14,11 @@ const messageSchema = new mongoose.Schema(
     content: {
       type: String,
     },
+    // a message could have its associated notification
+    DMNotification: {
+      type: ObjectId,
+      ref: 'DMNotification',
+    },
   },
   {
     timestamps: true,

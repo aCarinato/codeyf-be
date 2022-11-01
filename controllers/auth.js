@@ -1,4 +1,6 @@
 import User from '../models/User.js';
+import Chat from '../models/Chat.js';
+import Notification from '../models/Notification.js';
 import jwt from 'jsonwebtoken';
 // import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
@@ -418,6 +420,21 @@ export const login = async (req, res) => {
     });
   }
 
+  const chatModel = await Chat.findOne({ user: existingUser._id });
+  if (!chatModel) {
+    await new Chat({ user: existingUser._id, chats: [] }).save();
+  }
+
+  const notificationModel = await Notification.findOne({
+    user: existingUser._id,
+  });
+  if (!notificationModel) {
+    await new Notification({
+      user: existingUser._id,
+      notifications: [],
+    }).save();
+  }
+
   let token;
   token = jwt.sign(
     { _id: existingUser._id, email: existingUser.email },
@@ -428,8 +445,8 @@ export const login = async (req, res) => {
   res.status(201).json({
     success: true,
     loginUser: {
-      username: existingUser.username,
       userId: existingUser._id,
+      username: existingUser.username,
       email: existingUser.email,
       isAdmin: existingUser.isAdmin,
       token: token,
