@@ -1,5 +1,5 @@
-import User from '../models/User.js';
-import AdminNotification from '../models/AdminNotification.js';
+import User from '../../models/User.js';
+import AdminNotification from '../../models/AdminNotification.js';
 import bcrypt from 'bcryptjs';
 
 // @desc    Is the current user an admin?

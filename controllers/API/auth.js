@@ -1,11 +1,11 @@
-import User from '../models/User.js';
-import Chat from '../models/Chat.js';
-import Notification from '../models/Notification.js';
+import User from '../../models/User.js';
+import Chat from '../../models/Chat.js';
+import Notification from '../../models/Notification.js';
 import jwt from 'jsonwebtoken';
 // import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
 
-import { sendEmail } from '../utils/sendEmail.js';
+import { sendEmail } from '../../utils/sendEmail.js';
 
 // AWS.config.update({
 //   accessKeyId: process.env.AWS_ACCESS_KEY_ID,

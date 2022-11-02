@@ -8,7 +8,7 @@ import {
   mentorApproval,
   approveMentorRequest,
   rejectMentorRequest,
-} from '../controllers/admin.js';
+} from '../controllers/API/admin.js';
 import { requireSignin, requireAdmin } from '../middlewares/checkAuth.js';
 
 router.get('/current-admin', requireSignin, currentUserIsAdmin);

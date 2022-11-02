@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../../models/User.js';
 import cloudinary from 'cloudinary';
 
 cloudinary.config({
@@ -10,21 +10,21 @@ cloudinary.config({
 // @desc    Get user by email
 // @route   POST /api/user/
 // @access  Private
-export const getUser = async (req, res) => {
-  const { email } = req.body;
+// export const getUser = async (req, res) => {
+//   const { email } = req.body;
 
-  let user;
+//   let user;
 
-  try {
-    user = await User.findOne({ email: email });
-  } catch (err) {
-    console.log(err);
-  }
+//   try {
+//     user = await User.findOne({ email: email });
+//   } catch (err) {
+//     console.log(err);
+//   }
 
-  if (user) {
-    res.status(200).json({ success: true, user: user });
-  }
-};
+//   if (user) {
+//     res.status(200).json({ success: true, user: user });
+//   }
+// };
 
 // @desc    Completing user's profile
 // @route   PUT /api/user/complete-profile

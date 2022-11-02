@@ -53,21 +53,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', async () => {
-    // console.log('ciao ciao');
-    // const users = await addUser(userId, socket.id);
-    // console.log(socket.id);
     // socket.disconnect();
-    // console.log('PRIMA');
     const testone = getUsers();
-    // console.log(testone);
     const incriminato = testone.filter((user) => user.socketId === socket.id);
     if (incriminato !== undefined && incriminato.length > 0) {
       const incriminatoId = incriminato[0].userId;
-      // console.log('incriminato.userId; ', incriminatoId);
-      // console.log('DOPO');
       const newUsers = await removeUserOnLeave(incriminatoId, socket.id);
-      // const testone2 = getUsers();
-      // console.log(newUsers);
     }
   });
 
@@ -83,8 +74,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendNewMsg', async ({ userId, receiverId, msg }) => {
-    // WOULD BE BETTER: socket.on('sendNewMsg', async ({ senderId, receiverId, msg }) => {
-
     // create a new message and store it in the database for the sender and receiver (Chat.js)
     const { newMsg, error } = await sendMsg(userId, receiverId, msg);
 
@@ -93,12 +82,10 @@ io.on('connection', (socket) => {
     // console.log(receiverSocket);
 
     if (receiverSocket) {
-      // the receiver is online
+      // the receiver is online, but  not necessarily on the message page. In that case it still needs a notification
+      //  That will have to be handled in the frontend
       // WHEN YOU WANT TO SEND MESSAGE TO A PARTICULAR SOCKET
       io.to(receiverSocket.socketId).emit('newMsgReceived', { newMsg });
-
-      // (maybe) i need to put a notification here when the receiver is not on the router message with the sender
-      // socket.on('newNotification')
     }
     //
     else {
@@ -117,6 +104,10 @@ io.on('connection', (socket) => {
 
   socket.on('readNotification', async ({ notificationTo, msgFrom }) => {
     await readNotification(notificationTo, msgFrom);
+  });
+
+  socket.on('leave', async ({ userId }) => {
+    const users = await removeUserOnLeave(userId, socket.id);
   });
 });
 
