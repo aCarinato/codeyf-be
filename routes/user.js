@@ -9,7 +9,7 @@ import {
   deleteProfile,
   readNotifications,
   uploadImage,
-} from '../controllers/user.js';
+} from '../controllers/API/user.js';
 import { requireSignin } from '../middlewares/checkAuth.js';
 
 router.post('/', requireSignin, getUser);

@@ -7,7 +7,7 @@ import {
   getUsers,
   getUserInfo,
   getNotifications,
-} from '../controllers/chats.js';
+} from '../controllers/API/chats.js';
 
 // import { requireSignin } from '../middlewares/checkAuth.js';
 

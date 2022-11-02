@@ -1,6 +1,6 @@
-import Chat from '../models/Chat.js';
-import User from '../models/User.js';
-import Notification from '../models/Notification.js';
+import Chat from '../../models/Chat.js';
+import User from '../../models/User.js';
+import Notification from '../../models/Notification.js';
 
 // GET ALL CHATS FOR A USER
 

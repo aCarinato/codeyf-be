@@ -9,7 +9,7 @@ import {
   resetPassword,
   login,
   currentUser,
-} from '../controllers/auth.js';
+} from '../controllers/API/auth.js';
 
 import { requireSignin } from '../middlewares/checkAuth.js';
 
