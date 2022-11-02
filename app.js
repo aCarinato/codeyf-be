@@ -118,6 +118,10 @@ io.on('connection', (socket) => {
   socket.on('readNotification', async ({ notificationTo, msgFrom }) => {
     await readNotification(notificationTo, msgFrom);
   });
+
+  socket.on('leave', async ({ userId }) => {
+    const users = await removeUserOnLeave(userId, socket.id);
+  });
 });
 
 const port = process.env.PORT || 8000;
