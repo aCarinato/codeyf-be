@@ -4,7 +4,7 @@ import formidable from 'express-formidable';
 const router = express.Router();
 
 import {
-  getUser,
+  // getUser,
   completeProfile,
   deleteProfile,
   readNotifications,
@@ -12,7 +12,7 @@ import {
 } from '../controllers/API/user.js';
 import { requireSignin } from '../middlewares/checkAuth.js';
 
-router.post('/', requireSignin, getUser);
+// router.post('/', requireSignin, getUser);
 router.put('/complete-profile', requireSignin, completeProfile);
 router.delete('/delete-profile', requireSignin, deleteProfile);
 router.put('/read-notifications', requireSignin, readNotifications);
