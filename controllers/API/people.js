@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../../models/User.js';
 
 // export const getPeople = (req, res) => {
 //   try {
@@ -13,10 +13,14 @@ import User from '../models/User.js';
 // @access  Public
 export const getBuddies = async (req, res) => {
   try {
-    const { userEmail } = req.body;
+    // const { userEmail } = req.body;
+    // const buddies = await User.find({
+    //   isBuddy: true,
+    //   email: { $ne: userEmail },
+    // });
+
     const buddies = await User.find({
       isBuddy: true,
-      email: { $ne: userEmail },
     });
 
     if (buddies) {
@@ -34,10 +38,10 @@ export const getBuddies = async (req, res) => {
 // @access  Public
 export const getMentors = async (req, res) => {
   try {
-    const { userEmail } = req.body;
+    // const { userEmail } = req.body;
     const mentors = await User.find({
       isMentor: true,
-      email: { $ne: userEmail },
+      // email: { $ne: userEmail },
     });
 
     if (mentors) {
