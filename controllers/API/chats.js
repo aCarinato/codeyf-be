@@ -21,7 +21,7 @@ export const getChats = async (req, res) => {
         messagesWith: chat.messagesWith._id,
         username: chat.messagesWith.username,
         // name: chat.messagesWith.name,
-        // profilePicUrl: chat.messagesWith.profilePicUrl,
+        profilePicUrl: chat.messagesWith.profilePic,
         lastMessage: chat.messages[chat.messages.length - 1].msg,
         date: chat.messages[chat.messages.length - 1].date,
       }));
