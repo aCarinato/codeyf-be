@@ -63,7 +63,7 @@ export const getUserInfo = async (req, res) => {
       return res.status(404).send('No User found');
     }
 
-    return res.json({ username: user.username });
+    return res.json({ user });
   } catch (error) {
     console.error(error);
     return res.status(500).send('Server Error');
