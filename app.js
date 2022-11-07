@@ -70,7 +70,7 @@ io.on('connection', (socket) => {
 
     !error
       ? socket.emit('messagesLoaded', { chat })
-      : socket.emit('noChatFound');
+      : socket.emit('noChatFound', { error });
   });
 
   socket.on('sendNewMsg', async ({ userId, receiverId, msg }) => {
