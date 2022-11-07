@@ -111,14 +111,14 @@ const userSchema = new mongoose.Schema(
       type: Array,
     },
     // notifications are typically from admin. They cannot be replied ie they cannot start a conversation
-    notifications: {
-      type: [ObjectId],
-      ref: 'AdminNotification',
-    },
-    conversations: {
-      type: [ObjectId],
-      ref: 'Conversation',
-    },
+    // notifications: {
+    //   type: [ObjectId],
+    //   ref: 'AdminNotification',
+    // },
+    // conversations: {
+    //   type: [ObjectId],
+    //   ref: 'Conversation',
+    // },
   },
   {
     timestamps: true,
