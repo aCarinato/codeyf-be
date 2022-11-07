@@ -11,7 +11,7 @@ import {
   renderConversation,
   sendDMMessage,
 } from '../controllers/message.js';
-import { requireSignin } from '../middlewares/checkAuth.js';
+import { requireSignin } from '../../middlewares/checkAuth.js';
 
 router.post('/start-conversation', requireSignin, startConversation);
 router.get('/render-conversations', requireSignin, renderConversations);
