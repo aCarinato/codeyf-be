@@ -7,8 +7,8 @@ export const loadMessages = async (userId, messagesWith) => {
     const user = await Chat.findOne({ user: userId }).populate(
       'chats.messagesWith'
     );
-    // console.log('from loadMessages');
-    // console.log(user);
+    console.log('from loadMessages');
+    console.log(user);
     const chat = user.chats.find(
       (chat) => chat.messagesWith._id.toString() === messagesWith
     );
