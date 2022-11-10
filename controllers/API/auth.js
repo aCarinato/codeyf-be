@@ -1,6 +1,7 @@
 import User from '../../models/User.js';
 import Chat from '../../models/Chat.js';
 import Notification from '../../models/Notification.js';
+import GroupNotification from '../../models/GroupNotification.js';
 import jwt from 'jsonwebtoken';
 // import AWS from 'aws-sdk';
 import bcrypt from 'bcryptjs';
@@ -432,6 +433,17 @@ export const login = async (req, res) => {
     await new Notification({
       user: existingUser._id,
       notifications: [],
+    }).save();
+  }
+
+  const groupNotificationModel = await GroupNotification.findOne({
+    user: existingUser._id,
+  });
+  if (!groupNotificationModel) {
+    await new GroupNotification({
+      user: existingUser._id,
+      notificationsTo: [],
+      notificationsFrom: [],
     }).save();
   }
 

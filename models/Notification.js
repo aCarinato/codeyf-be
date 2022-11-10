@@ -11,6 +11,7 @@ const NotificationSchema = new Schema({
         enum: [
           'newAdminMsg',
           'newChatMsg',
+          'groupMsg',
           'newLike',
           'newComment',
           'newFollower',

@@ -1,5 +1,5 @@
 import User from './models/User.js';
-import Conversation from './models/Conversation.js';
+import GroupNotification from './models/GroupNotification.js';
 
 import connectDB from './config/db.js';
 
@@ -10,15 +10,35 @@ const addField = async () => {
     // await User.aggregate([
     //   { $addFields: { testField: { type: String, default: 'testone' } } },
     // ]);
-    await User.updateMany(
-      {},
-      {
-        $set: {
-          nNotifications: 0,
-          conversations: [],
-        },
-      }
-    );
+
+    // ADD A NEW DATA MODEL FOR ALL USERS
+    const users = await User.find();
+
+    users.forEach(async (user) => {
+      console.log(user);
+      await new GroupNotification({
+        user: user._id,
+        notificationsTo: [],
+        notificationsFrom: [],
+      }).save();
+    });
+
+    // // ADD A FIELD TO ALL DATA MODELS ABOVE
+    // await GroupNotification.aggregate([
+    //   {
+    //     $addFields: { groupId: { type: Schema.Types.ObjectId, ref: 'Group' } }, // WROOONG
+    //   },
+    // ]);
+
+    // await User.updateMany(
+    //   {},
+    //   {
+    //     $set: {
+    //       nNotifications: 0,
+    //       conversations: [],
+    //     },
+    //   }
+    // );
     // ----------------------------------- //
     // await Conversation.updateMany(
     //   {},

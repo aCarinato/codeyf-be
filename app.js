@@ -17,11 +17,17 @@ import {
 
 import {
   loadMessages,
-  sendMsg,
+  sendChatMsg,
   setMsgToUnread,
-  setNotification,
+  setChatNotification,
   readNotification,
-} from './controllers/socket/messages.js';
+} from './controllers/socket/chats.js';
+
+import {
+  setJoinReqNotification,
+  setJoinReqNotificationSender,
+  setJoinReqNotificationReceiver,
+} from './controllers/socket/groups.js';
 
 // ROUTES
 import people from './routes/people.js';
@@ -74,9 +80,9 @@ io.on('connection', (socket) => {
       : socket.emit('noChatFound', { error });
   });
 
-  socket.on('sendNewMsg', async ({ userId, receiverId, msg }) => {
+  socket.on('sendNewChatMsg', async ({ userId, receiverId, msg }) => {
     // create a new message and store it in the database for the sender and receiver (Chat.js)
-    const { newMsg, error } = await sendMsg(userId, receiverId, msg);
+    const { newMsg, error } = await sendChatMsg(userId, receiverId, msg);
 
     // Check if the receiver is online
     const receiverSocket = findConnectedUser(receiverId);
@@ -91,21 +97,61 @@ io.on('connection', (socket) => {
     //
     else {
       await setMsgToUnread(userId, receiverId);
-      await setNotification(userId, receiverId);
+      await setChatNotification(userId, receiverId);
     }
 
     !error && socket.emit('msgSent', { newMsg });
     // socket.emit('notificationSent');
   });
 
-  socket.on('sendNotification', async ({ senderId, receiverId }) => {
+  socket.on('sendChatNotification', async ({ senderId, receiverId }) => {
     // console.log(`senderId: ${senderId} receiverId: ${receiverId}`);
-    await setNotification(senderId, receiverId);
+    await setChatNotification(senderId, receiverId);
   });
 
   socket.on('readNotification', async ({ notificationTo, msgFrom }) => {
     await readNotification(notificationTo, msgFrom);
   });
+
+  // GROUPS
+  socket.on('joinGroupReq', async ({ senderId, receiverId, groupId }) => {
+    // console.log(
+    //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+    // );
+
+    // set notification on sender - the sender is certainly online and the notifications will be added there too
+    const { alreadyExists } = await setJoinReqNotificationSender(
+      senderId,
+      receiverId,
+      groupId
+    );
+
+    if (!alreadyExists) {
+      // Check if the receiver is online
+      const receiverSocket = findConnectedUser(receiverId);
+
+      if (receiverSocket) {
+        io.to(receiverSocket.socketId).emit('joinReqNotification', {
+          senderId,
+          receiverId,
+          groupId,
+        });
+      } else {
+        //  set the notification in the db for the received. when he opens the app it will be loaded
+        await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+      }
+    }
+  });
+
+  socket.on(
+    'saveJoinReqNotification',
+    async ({ senderId, receiverId, groupId }) => {
+      // console.log(
+      //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+      // );
+      await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+    }
+  );
 
   socket.on('leave', async ({ userId }) => {
     const users = await removeUserOnLeave(userId, socket.id);

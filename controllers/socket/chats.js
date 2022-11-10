@@ -24,7 +24,7 @@ export const loadMessages = async (userId, messagesWith) => {
   }
 };
 
-export const sendMsg = async (userId, receiverId, msg) => {
+export const sendChatMsg = async (userId, receiverId, msg) => {
   try {
     // LOGGED IN USER (SENDER)
     const sender = await Chat.findOne({ user: userId });
@@ -95,7 +95,7 @@ export const setMsgToUnread = async (receiverId) => {
   }
 };
 
-export const setNotification = async (senderId, receiverId) => {
+export const setChatNotification = async (senderId, receiverId) => {
   try {
     const newChatMsgNotifications = await Notification.findOne({
       $and: [{ user: receiverId }, { 'notifications.type': 'newChatMsg' }],
