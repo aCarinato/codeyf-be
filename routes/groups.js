@@ -2,11 +2,16 @@ import express from 'express';
 
 const router = express.Router();
 
-import { createNewGroup } from '../controllers/API/groups.js';
+import {
+  getGroup,
+  createNewGroup,
+  getNotifications,
+} from '../controllers/API/groups.js';
 
 import { requireSignin } from '../middlewares/checkAuth.js';
 
-// router.get('/users/:username', getUsers);
+router.get('/:groupId', getGroup);
 router.post('/new', requireSignin, createNewGroup);
+router.get('/notifications/:userId', requireSignin, getNotifications);
 
 export default router;
