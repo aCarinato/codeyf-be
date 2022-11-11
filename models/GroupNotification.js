@@ -6,6 +6,7 @@ const GroupNotificationSchema = new Schema({
   // for every notification sent there is one received. And vice versa
   notificationsTo: [
     {
+      // _id given automatically by mondodb
       type: {
         type: String,
         enum: ['joinReq', 'receivedFeedback'],
@@ -19,6 +20,7 @@ const GroupNotificationSchema = new Schema({
   ],
   notificationsFrom: [
     {
+      // _id given automatically by mondodb
       type: {
         type: String,
         enum: ['joinReq', 'receivedFeedback'],

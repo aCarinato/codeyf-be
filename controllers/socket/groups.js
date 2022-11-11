@@ -180,3 +180,43 @@ export const setJoinReqNotificationReceiver = async (
     console.log(err);
   }
 };
+
+export const readJoinReqNotification = async (
+  senderId,
+  receiverId,
+  groupId
+) => {
+  try {
+    await GroupNotification.updateOne(
+      {
+        $and: [
+          {
+            $and: [
+              {
+                user: receiverId,
+              },
+              {
+                'notificationsFrom.type': 'joinReq',
+              },
+            ],
+          },
+          {
+            $and: [
+              {
+                'notificationsFrom.groupId': groupId,
+              },
+              {
+                'notificationsFrom.from': senderId,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        $set: { 'notificationsFrom.$.isRead': true },
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -27,6 +27,7 @@ import {
   setJoinReqNotification,
   setJoinReqNotificationSender,
   setJoinReqNotificationReceiver,
+  readJoinReqNotification,
 } from './controllers/socket/groups.js';
 
 // ROUTES
@@ -69,6 +70,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ----------- CHATS ----------- //
   socket.on('loadMessages', async ({ userId, messagesWith }) => {
     // console.log(
     //   `FROM SOCKET 'loadMessages' - userId: ${userId}, messagesWith: ${messagesWith}`
@@ -112,8 +114,9 @@ io.on('connection', (socket) => {
   socket.on('readNotification', async ({ notificationTo, msgFrom }) => {
     await readNotification(notificationTo, msgFrom);
   });
+  // ----------- END OF CHATS ----------- //
 
-  // GROUPS
+  // ----------- GROUPS ----------- //
   socket.on('joinGroupReq', async ({ senderId, receiverId, groupId }) => {
     // console.log(
     //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
@@ -146,12 +149,21 @@ io.on('connection', (socket) => {
   socket.on(
     'saveJoinReqNotification',
     async ({ senderId, receiverId, groupId }) => {
-      // console.log(
-      //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
-      // );
       await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
     }
   );
+
+  socket.on(
+    'readJoinReqNotification',
+    async ({ senderId, receiverId, groupId }) => {
+      // console.log(
+      //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+      // );
+      await readJoinReqNotification(senderId, receiverId, groupId);
+    }
+  );
+
+  // ----------- END OF GROUPS ----------- //
 
   socket.on('leave', async ({ userId }) => {
     const users = await removeUserOnLeave(userId, socket.id);
