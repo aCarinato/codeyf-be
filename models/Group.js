@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
-
+// A GROUP NEEDS TO HAVE AT LEAST 2 PEOPLE
 const GroupSchema = new Schema({
   name: {
     type: String,
@@ -16,7 +16,7 @@ const GroupSchema = new Schema({
   buddiesFilled: { type: Boolean, default: false },
   mentorRequired: { type: Boolean, default: false },
   nMentorsRequired: { type: Number, default: 1 },
-  mentors: [],
+  mentors: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   mentorsFilled: { type: Boolean, default: false },
   topics: [],
   learning: [],
