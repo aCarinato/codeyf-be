@@ -11,6 +11,7 @@ const NotificationSchema = new Schema({
         enum: [
           'newAdminMsg',
           'newChatMsg',
+          'joinTeam',
           'groupMsg',
           'newLike',
           'newComment',
@@ -19,6 +20,7 @@ const NotificationSchema = new Schema({
       },
       from: { type: Schema.Types.ObjectId, ref: 'User' },
       post: { type: Schema.Types.ObjectId, ref: 'Post' },
+      groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
       commentId: { type: String },
       text: { type: String },
       isRead: { type: Boolean, default: false },

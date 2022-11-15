@@ -24,10 +24,13 @@ import {
 } from './controllers/socket/chats.js';
 
 import {
-  setJoinReqNotification,
-  setJoinReqNotificationSender,
-  setJoinReqNotificationReceiver,
-  readJoinReqNotification,
+  // setJoinReqNotification,
+  // setJoinReqNotificationSender,
+  // setJoinReqNotificationReceiver,
+  // readJoinReqNotification,
+  addBuddyToGroup,
+  saveGroupJoinedNotification,
+  readGroupJoinedNotification,
 } from './controllers/socket/groups.js';
 
 // ROUTES
@@ -88,7 +91,7 @@ io.on('connection', (socket) => {
 
     // Check if the receiver is online
     const receiverSocket = findConnectedUser(receiverId);
-    // console.log(receiverSocket);
+    console.log(`From sendNewChatMsg - receiverSocket: ${receiverSocket}`);
 
     if (receiverSocket) {
       // the receiver is online, but  not necessarily on the message page. In that case it still needs a notification
@@ -117,51 +120,118 @@ io.on('connection', (socket) => {
   // ----------- END OF CHATS ----------- //
 
   // ----------- GROUPS ----------- //
-  socket.on('joinGroupReq', async ({ senderId, receiverId, groupId }) => {
-    // console.log(
-    //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
-    // );
-
-    // set notification on sender - the sender is certainly online and the notifications will be added there too
-    const { alreadyExists } = await setJoinReqNotificationSender(
-      senderId,
-      receiverId,
-      groupId
-    );
-
-    if (!alreadyExists) {
+  socket.on('addBuddyToGroup', async ({ organiserId, groupId, buddyId }) => {
+    // console.log(`groupId; ${groupId}, buddyId: ${buddyId}`);
+    const { alreadyExists } = await addBuddyToGroup(groupId, buddyId);
+    // console.log(alreadyExists);
+    if (alreadyExists) {
+      // emit event to inform the user
+      const organiserSocket = findConnectedUser(organiserId);
+      if (organiserSocket) {
+        const msg = 'user already in the group';
+        io.to(organiserSocket.socketId).emit('buddyAlreadyJoined', { msg });
+      }
+    } else {
+      // send notification to buddyId
       // Check if the receiver is online
-      const receiverSocket = findConnectedUser(receiverId);
-
-      if (receiverSocket) {
-        io.to(receiverSocket.socketId).emit('joinReqNotification', {
-          senderId,
-          receiverId,
+      const buddySocket = findConnectedUser(buddyId);
+      // console.log(
+      //   '1) FROM app.js socket.on(addBuddyToGroup): Buddy not yet in the group'
+      // );
+      if (buddySocket) {
+        // console.log(
+        //   `2) FROM app.js socket.emit(joinedGroupNotification): buddySocket.socketId: ${buddySocket.socketId}`
+        // );
+        // console.log(
+        //   `3) FROM app.js socket.emit(joinedGroupNotification) = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
+        // );
+        io.to(buddySocket.socketId).emit('joinedGroupNotification', {
+          organiserId,
+          buddyId,
           groupId,
         });
       } else {
-        //  set the notification in the db for the received. when he opens the app it will be loaded
-        await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+        // save in the database
+        await saveGroupJoinedNotification(organiserId, buddyId, groupId);
       }
     }
   });
 
   socket.on(
-    'saveJoinReqNotification',
-    async ({ senderId, receiverId, groupId }) => {
-      await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+    'saveGroupJoinedNotification',
+    async ({ organiserId, buddyId, groupId }) => {
+      // console.log(`6) from app.js 'saveGroupJoinedNotification'`);
+      // save in the database
+      await saveGroupJoinedNotification(organiserId, buddyId, groupId);
     }
   );
 
   socket.on(
-    'readJoinReqNotification',
-    async ({ senderId, receiverId, groupId }) => {
+    'readGroupJoinedNotification',
+    async ({ organiserId, buddyId, groupId }) => {
       // console.log(
-      //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+      //   `9) FROM app.js readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
       // );
-      await readJoinReqNotification(senderId, receiverId, groupId);
+      await readGroupJoinedNotification(buddyId, groupId);
     }
   );
+
+  // -------------------
+  // OLD OLD OLD
+  // socket.on('joinGroupReq', async ({ senderId, receiverId, groupId }) => {
+  //   // console.log(
+  //   //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+  //   // );
+
+  //   // set notification on sender - the sender is certainly online and the notifications will be added there too
+  //   const { alreadyExists } = await setJoinReqNotificationSender(
+  //     senderId,
+  //     receiverId,
+  //     groupId
+  //   );
+
+  //   if (!alreadyExists) {
+  //     // Check if the receiver is online
+  //     const receiverSocket = findConnectedUser(receiverId);
+
+  //     if (receiverSocket) {
+  //       io.to(receiverSocket.socketId).emit('joinReqNotification', {
+  //         senderId,
+  //         receiverId,
+  //         groupId,
+  //       });
+  //     } else {
+  //       //  set the notification in the db for the received. when he opens the app it will be loaded
+  //       await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+  //     }
+  //   }
+  // });
+
+  // socket.on(
+  //   'saveJoinReqNotification',
+  //   async ({ senderId, receiverId, groupId }) => {
+  //     await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
+  //   }
+  // );
+
+  // socket.on(
+  //   'readJoinReqNotification',
+  //   async ({ senderId, receiverId, groupId }) => {
+  //     // console.log(
+  //     //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
+  //     // );
+  //     await readJoinReqNotification(senderId, receiverId, groupId);
+  //   }
+  // );
+
+  // socket.on(
+  //   'joinGroupRes',
+  //   async ({ senderId, receiverId, groupId, joinRes }) => {
+  //     console.log(
+  //       `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId} joinRes: ${joinRes}`
+  //     );
+  //   }
+  // );
 
   // ----------- END OF GROUPS ----------- //
 

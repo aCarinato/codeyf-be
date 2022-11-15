@@ -15,11 +15,10 @@ const addField = async () => {
     const users = await User.find();
 
     users.forEach(async (user) => {
-      console.log(user);
+      // console.log(user);
       await new GroupNotification({
         user: user._id,
-        notificationsTo: [],
-        notificationsFrom: [],
+        notifications: [],
       }).save();
     });
 
