@@ -32,6 +32,12 @@ export const createNewGroup = async (req, res) => {
       await group.updateOne({
         $push: { buddies: newBuddy },
       });
+
+      if (group.nBuddies === 1) {
+        await group.updateOne({
+          $set: { buddiesFilled: true },
+        });
+      }
     }
 
     if (organiserIsMentor) {
