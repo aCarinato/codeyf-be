@@ -62,5 +62,14 @@ export const removeUserOnLeave = async (userId, socketId) => {
 
 // find out if the message receiver is online (when the message is sent)
 // it doesn't necessarily mean that he is in the message url with the sender (openChatId.current)
-export const findConnectedUser = (userId) =>
-  users.find((user) => user.userId === userId);
+export const findConnectedUser = (userId) => {
+  // console.log(`----------------------`);
+  // console.log(`8) from findConnectedUser - userId: ${userId}`);
+  // // users.forEach((user) => console.log(`${JSON.stringify(user)}`));
+  // // console.log(`----------------------`);
+  // const receiver = users.find((user) => user.userId === userId);
+  // console.log(receiver);
+  // // users.find((user) => user.userId === userId);
+  // // return;
+  return users.find((user) => user.userId === userId);
+};

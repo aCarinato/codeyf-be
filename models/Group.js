@@ -12,7 +12,7 @@ const GroupSchema = new Schema({
   },
   organiser: { type: Schema.Types.ObjectId, ref: 'User' },
   nBuddies: { type: Number, required: true },
-  buddies: [],
+  buddies: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   buddiesFilled: { type: Boolean, default: false },
   mentorRequired: { type: Boolean, default: false },
   nMentorsRequired: { type: Number, default: 1 },
