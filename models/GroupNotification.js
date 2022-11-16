@@ -7,7 +7,7 @@ const GroupNotificationSchema = new Schema({
     {
       type: {
         type: String,
-        enum: ['groupJoined', 'groupMsg'],
+        enum: ['groupJoinedAsBuddy', 'groupJoinedAsMentor', 'groupMsg'],
       },
       from: { type: Schema.Types.ObjectId, ref: 'User' },
       groupId: { type: Schema.Types.ObjectId, ref: 'Group' },

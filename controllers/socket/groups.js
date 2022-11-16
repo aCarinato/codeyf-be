@@ -41,16 +41,65 @@ export const addBuddyToGroup = async (groupId, buddyId) => {
   }
 };
 
-export const saveGroupJoinedNotification = async (
+export const addMentorToGroup = async (groupId, mentorId, receiverId) => {
+  const retrievedGroup = await Group.find({
+    $and: [{ _id: groupId }, { mentors: { _id: mentorId } }],
+  });
+  // console.log(retrievedGroup);
+
+  const alreadyExists = retrievedGroup.length > 0;
+  console.log(
+    `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
+  );
+  if (alreadyExists) {
+    return { alreadyExists };
+  } else {
+    // retrive the buddy
+    const newMentor = await User.findById(mentorId);
+    // this assumes it is not possible to get to here if the group is already filled! (check frontend)
+    await Group.updateOne(
+      {
+        _id: groupId,
+      },
+      {
+        $push: { mentors: newMentor },
+      }
+    );
+
+    // if after adding new buddy the group is filled, mark it as 'filled'
+    const updatedGroup = await Group.findById(groupId);
+    // console.log(
+    //   `updatedGroup.nMentorsRequired: ${updatedGroup.nMentorsRequired}`
+    // );
+    // console.log(`updatedGroup.mentors.length: ${updatedGroup.mentors.length}`);
+    // console.log(`Number(updatedGroup.nMentorsRequired) ===
+    // Number(updatedGroup.mentors.length): ${
+    //   Number(updatedGroup.nMentorsRequired) ===
+    //   Number(updatedGroup.mentors.length)
+    // }`);
+    if (
+      Number(updatedGroup.nMentorsRequired) ===
+      Number(updatedGroup.mentors.length)
+    ) {
+      await updatedGroup.updateOne({
+        $set: { mentorsFilled: true },
+      });
+    }
+
+    return { alreadyExists };
+  }
+};
+
+export const saveGroupJoinedAsBuddyNotification = async (
   organiserId,
-  buddyId,
+  receiverId,
   groupId
 ) => {
   try {
     const newNotification = {
-      type: 'groupJoined',
+      type: 'groupJoinedAsBuddy',
       from: organiserId,
-      text: `You have been added to a new team`,
+      text: `You have been added to a new team as a buddy`,
       groupId: groupId,
       isRead: false,
       date: Date.now(),
@@ -63,7 +112,7 @@ export const saveGroupJoinedNotification = async (
     // );
 
     await GroupNotification.updateOne(
-      { user: buddyId },
+      { user: receiverId },
       {
         $push: { notifications: newNotification },
       }
@@ -73,20 +122,76 @@ export const saveGroupJoinedNotification = async (
   }
 };
 
-export const readGroupJoinedNotification = async (
+export const readGroupJoinedAsBuddyNotification = async (
   // organiserId,
   buddyId,
   groupId
 ) => {
   try {
-    // console.log(
-    //   `10) FROM API readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
-    // );
+    console.log(
+      `10) FROM API readGroupJoinedAsBuddyNotification = receiverId: ${buddyId},  groupId: ${groupId}`
+    );
     await GroupNotification.updateOne(
       {
         'notifications.groupId': groupId,
         user: buddyId,
-        'notifications.$.type': 'groupJoined', // it's an enumeration!! you need .$.
+        'notifications.$.type': 'groupJoinedAsBuddy', // it's an enumeration!! you need .$.
+      },
+      {
+        $set: { 'notifications.$.isRead': true },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const saveGroupJoinedAsMentorNotification = async (
+  organiserId,
+  mentorId,
+  groupId
+) => {
+  try {
+    const newNotification = {
+      type: 'groupJoinedAsMentor',
+      from: organiserId,
+      text: `You have been added to a new team as a mentor`,
+      groupId: groupId,
+      isRead: false,
+      date: Date.now(),
+    };
+
+    // console.log(
+    //   `7) from API saveGroupJoinedNotification() newNotification: ${JSON.stringify(
+    //     newNotification
+    //   )}`
+    // );
+
+    await GroupNotification.updateOne(
+      { user: mentorId },
+      {
+        $push: { notifications: newNotification },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const readGroupJoinedAsMentorNotification = async (
+  // organiserId,
+  mentorId,
+  groupId
+) => {
+  try {
+    console.log(
+      `10) FROM API readGroupJoinedAsMentorNotification = buddyId: ${mentorId},  groupId: ${groupId}`
+    );
+    await GroupNotification.updateOne(
+      {
+        'notifications.groupId': groupId,
+        user: mentorId,
+        'notifications.$.type': 'groupJoinedAsMentor', // it's an enumeration!! you need .$.
       },
       {
         $set: { 'notifications.$.isRead': true },

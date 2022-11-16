@@ -24,13 +24,16 @@ import {
 } from './controllers/socket/chats.js';
 
 import {
-  // setJoinReqNotification,
-  // setJoinReqNotificationSender,
-  // setJoinReqNotificationReceiver,
-  // readJoinReqNotification,
+  // buddy
   addBuddyToGroup,
-  saveGroupJoinedNotification,
-  readGroupJoinedNotification,
+  saveGroupJoinedAsBuddyNotification,
+  readGroupJoinedAsBuddyNotification,
+  // mentor
+  addMentorToGroup,
+  saveGroupJoinedAsMentorNotification,
+  readGroupJoinedAsMentorNotification,
+  // saveGroupJoinedNotification,
+  // readGroupJoinedNotification,
 } from './controllers/socket/groups.js';
 
 // ROUTES
@@ -91,7 +94,7 @@ io.on('connection', (socket) => {
 
     // Check if the receiver is online
     const receiverSocket = findConnectedUser(receiverId);
-    console.log(`From sendNewChatMsg - receiverSocket: ${receiverSocket}`);
+    // console.log(`From sendNewChatMsg - receiverSocket: ${receiverSocket}`);
 
     if (receiverSocket) {
       // the receiver is online, but  not necessarily on the message page. In that case it still needs a notification
@@ -120,8 +123,11 @@ io.on('connection', (socket) => {
   // ----------- END OF CHATS ----------- //
 
   // ----------- GROUPS ----------- //
+  // Add Buddy
   socket.on('addBuddyToGroup', async ({ organiserId, groupId, buddyId }) => {
-    // console.log(`groupId; ${groupId}, buddyId: ${buddyId}`);
+    console.log(
+      `1) from app.js 'addBuddyToGroup' => groupId; ${groupId}, buddyId: ${buddyId}`
+    );
     const { alreadyExists } = await addBuddyToGroup(groupId, buddyId);
     // console.log(alreadyExists);
     if (alreadyExists) {
@@ -139,42 +145,102 @@ io.on('connection', (socket) => {
       //   '1) FROM app.js socket.on(addBuddyToGroup): Buddy not yet in the group'
       // );
       if (buddySocket) {
-        // console.log(
-        //   `2) FROM app.js socket.emit(joinedGroupNotification): buddySocket.socketId: ${buddySocket.socketId}`
-        // );
+        console.log(
+          `2) FROM app.js socket.emit(joinedGroupNotification): buddySocket.socketId: ${buddySocket.socketId}`
+        );
         // console.log(
         //   `3) FROM app.js socket.emit(joinedGroupNotification) = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
         // );
-        io.to(buddySocket.socketId).emit('joinedGroupNotification', {
+        io.to(buddySocket.socketId).emit('joinedGroupAsBuddyNotification', {
           organiserId,
           buddyId,
           groupId,
         });
       } else {
         // save in the database
-        await saveGroupJoinedNotification(organiserId, buddyId, groupId);
+        await saveGroupJoinedAsBuddyNotification(organiserId, buddyId, groupId);
       }
     }
   });
 
   socket.on(
-    'saveGroupJoinedNotification',
+    'saveGroupJoinedAsBuddyNotification',
     async ({ organiserId, buddyId, groupId }) => {
       // console.log(`6) from app.js 'saveGroupJoinedNotification'`);
       // save in the database
-      await saveGroupJoinedNotification(organiserId, buddyId, groupId);
+      await saveGroupJoinedAsBuddyNotification(organiserId, buddyId, groupId);
     }
   );
 
   socket.on(
-    'readGroupJoinedNotification',
+    'readGroupJoinedAsBuddyNotification',
     async ({ organiserId, buddyId, groupId }) => {
       // console.log(
       //   `9) FROM app.js readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
       // );
-      await readGroupJoinedNotification(buddyId, groupId);
+      await readGroupJoinedAsBuddyNotification(buddyId, groupId);
     }
   );
+
+  // Add Mentor
+  socket.on(
+    'addMentorToGroup',
+    async ({ organiserId, groupId, mentorId, receiverId }) => {
+      console.log(
+        `from app.js - 'addMentorToGroup' groupId; ${groupId}, receiverId: ${mentorId}`
+      );
+      const { alreadyExists } = await addMentorToGroup(groupId, mentorId);
+      if (alreadyExists) {
+        // emit event to inform the user
+        const organiserSocket = findConnectedUser(organiserId);
+        if (organiserSocket) {
+          const msg = 'user already in the group';
+          io.to(organiserSocket.socketId).emit('mentorAlreadyJoined', { msg });
+        }
+      } else {
+        // send notification to buddyId
+        // Check if the receiver is online
+        const mentorSocket = findConnectedUser(mentorId);
+        console.log(
+          `2) FROM app.js socket.emit(joinedGroupNotification): mentorSocket.socketId: ${mentorSocket.socketId}`
+        );
+        if (mentorSocket) {
+          io.to(mentorSocket.socketId).emit('joinedGroupAsMentorNotification', {
+            organiserId,
+            mentorId,
+            groupId,
+          });
+        } else {
+          // save in the database
+          await saveGroupJoinedAsMentorNotification(
+            organiserId,
+            mentorId,
+            groupId
+          );
+        }
+      }
+    }
+  );
+
+  socket.on(
+    'saveGroupJoinedAsMentorNotification',
+    async ({ organiserId, mentorId, groupId }) => {
+      // console.log(`6) from app.js 'saveGroupJoinedNotification'`);
+      // save in the database
+      await saveGroupJoinedAsMentorNotification(organiserId, mentorId, groupId);
+    }
+  );
+
+  socket.on(
+    'readGroupJoinedAsMentorNotification',
+    async ({ organiserId, mentorId, groupId }) => {
+      // console.log(
+      //   `9) FROM app.js readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
+      // );
+      await readGroupJoinedAsMentorNotification(mentorId, groupId);
+    }
+  );
+
   // ----------- END OF GROUPS ----------- //
 
   socket.on('leave', async ({ userId }) => {
