@@ -1,3 +1,4 @@
+import User from '../../models/User.js';
 import Group from '../../models/Group.js';
 import GroupNotification from '../../models/GroupNotification.js';
 
@@ -18,12 +19,40 @@ export const getAllGroups = async (req, res) => {
 // @route   POST /api/groups/new
 // @access  Private
 export const createNewGroup = async (req, res) => {
-  const newGroup = req.body;
+  const { organiserIsBuddy, organiserIsMentor, newGroup } = req.body;
   newGroup.organiser = req.user._id;
 
   try {
     const group = new Group(newGroup);
     await group.save();
+
+    if (organiserIsBuddy) {
+      // if the organiser wants to be a buddy add it to the buddies
+      const newBuddy = await User.findById(req.user._id);
+      await group.updateOne({
+        $push: { buddies: newBuddy },
+      });
+
+      if (group.nBuddies === 1) {
+        await group.updateOne({
+          $set: { buddiesFilled: true },
+        });
+      }
+    }
+
+    if (organiserIsMentor) {
+      const newMentor = await User.findById(req.user._id);
+      await group.updateOne({
+        $push: { mentors: newMentor },
+      });
+
+      if (group.nMentorsRequired === 1) {
+        await group.updateOne({
+          $set: { mentorsFilled: true },
+        });
+      }
+    }
+
     res.status(200).json({ success: true, newGroupId: group._id });
   } catch (err) {
     console.log(err);
@@ -37,7 +66,9 @@ export const getGroup = async (req, res) => {
   const groupId = req.params.groupId;
 
   try {
-    const group = await Group.findById(groupId);
+    const group = await Group.findById(groupId).populate(
+      'organiser buddies mentors'
+    );
     // console.log(group);
     res.status(200).json({ success: true, group });
   } catch (err) {

@@ -7,7 +7,7 @@ const GroupNotificationSchema = new Schema({
     {
       type: {
         type: String,
-        enum: ['newAdminMsg', 'newChatMsg', 'groupJoined', 'groupMsg'],
+        enum: ['groupJoinedAsBuddy', 'groupJoinedAsMentor', 'groupMsg'],
       },
       from: { type: Schema.Types.ObjectId, ref: 'User' },
       groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
@@ -16,37 +16,6 @@ const GroupNotificationSchema = new Schema({
       date: { type: Date, default: Date.now },
     },
   ],
-  // // for every notification sent there is one received. And vice versa
-  // notificationsTo: [
-  //   {
-  //     // _id given automatically by mondodb
-  //     type: {
-  //       type: String,
-  //       enum: ['joinReq', 'joinRes', 'receivedFeedback'],
-  //     },
-  //     groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
-  //     to: { type: Schema.Types.ObjectId, ref: 'User' },
-  //     text: { type: String },
-  //     isRead: { type: Boolean, default: false },
-  //     date: { type: Date, default: Date.now },
-  //     // answered: { type: Boolean, default: false },
-  //   },
-  // ],
-  // notificationsFrom: [
-  //   {
-  //     // _id given automatically by mondodb
-  //     type: {
-  //       type: String,
-  //       enum: ['joinReq', 'joinRes', 'receivedFeedback'],
-  //     },
-  //     groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
-  //     from: { type: Schema.Types.ObjectId, ref: 'User' },
-  //     text: { type: String },
-  //     isRead: { type: Boolean, default: false },
-  //     date: { type: Date, default: Date.now },
-  //     // answered: { type: Boolean, default: false },
-  //   },
-  // ],
 });
 
 const GroupNotification = mongoose.model(
@@ -55,3 +24,35 @@ const GroupNotification = mongoose.model(
 );
 
 export default GroupNotification;
+
+// // for every notification sent there is one received. And vice versa
+// notificationsTo: [
+//   {
+//     // _id given automatically by mondodb
+//     type: {
+//       type: String,
+//       enum: ['joinReq', 'joinRes', 'receivedFeedback'],
+//     },
+//     groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
+//     to: { type: Schema.Types.ObjectId, ref: 'User' },
+//     text: { type: String },
+//     isRead: { type: Boolean, default: false },
+//     date: { type: Date, default: Date.now },
+//     // answered: { type: Boolean, default: false },
+//   },
+// ],
+// notificationsFrom: [
+//   {
+//     // _id given automatically by mondodb
+//     type: {
+//       type: String,
+//       enum: ['joinReq', 'joinRes', 'receivedFeedback'],
+//     },
+//     groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
+//     from: { type: Schema.Types.ObjectId, ref: 'User' },
+//     text: { type: String },
+//     isRead: { type: Boolean, default: false },
+//     date: { type: Date, default: Date.now },
+//     // answered: { type: Boolean, default: false },
+//   },
+// ],
