@@ -2,6 +2,51 @@ import GroupNotification from '../../models/GroupNotification.js';
 import Group from '../../models/Group.js';
 import User from '../../models/User.js';
 
+export const addUserToGroup = async (groupId, userToAddId, type) => {
+  if (type === 'buddy') {
+    const { alreadyExists } = await addBuddyToGroup(groupId, userToAddId);
+    return alreadyExists;
+  }
+
+  if (type === 'mentor') {
+    const { alreadyExists } = await addMentorToGroup(groupId, userToAddId);
+    return alreadyExists;
+  }
+};
+
+export const saveGroupJoinedNotification = async (
+  organiserId,
+  userToAddId,
+  groupId,
+  type
+) => {
+  if (type === 'buddy') {
+    await saveGroupJoinedAsBuddyNotification(organiserId, userToAddId, groupId);
+  }
+
+  if (type === 'mentor') {
+    await saveGroupJoinedAsMentorNotification(
+      organiserId,
+      userToAddId,
+      groupId
+    );
+  }
+};
+
+export const readGroupJoinedNotification = async (
+  userToAddId,
+  groupId,
+  type
+) => {
+  if (type === 'buddy') {
+    await readGroupJoinedAsBuddyNotification(userToAddId, groupId);
+  }
+
+  if (type === 'mentor') {
+    await readGroupJoinedAsMentorNotification(userToAddId, groupId);
+  }
+};
+
 export const addBuddyToGroup = async (groupId, buddyId) => {
   // check if in the group there is already that buddy
 
@@ -48,9 +93,9 @@ export const addMentorToGroup = async (groupId, mentorId, receiverId) => {
   // console.log(retrievedGroup);
 
   const alreadyExists = retrievedGroup.length > 0;
-  console.log(
-    `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
-  );
+  // console.log(
+  //   `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
+  // );
   if (alreadyExists) {
     return { alreadyExists };
   } else {
@@ -128,9 +173,9 @@ export const readGroupJoinedAsBuddyNotification = async (
   groupId
 ) => {
   try {
-    console.log(
-      `10) FROM API readGroupJoinedAsBuddyNotification = receiverId: ${buddyId},  groupId: ${groupId}`
-    );
+    // console.log(
+    //   `10) FROM API readGroupJoinedAsBuddyNotification = receiverId: ${buddyId},  groupId: ${groupId}`
+    // );
     await GroupNotification.updateOne(
       {
         'notifications.groupId': groupId,
@@ -184,9 +229,9 @@ export const readGroupJoinedAsMentorNotification = async (
   groupId
 ) => {
   try {
-    console.log(
-      `10) FROM API readGroupJoinedAsMentorNotification = buddyId: ${mentorId},  groupId: ${groupId}`
-    );
+    // console.log(
+    //   `10) FROM API readGroupJoinedAsMentorNotification = buddyId: ${mentorId},  groupId: ${groupId}`
+    // );
     await GroupNotification.updateOne(
       {
         'notifications.groupId': groupId,
