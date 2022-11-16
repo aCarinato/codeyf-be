@@ -2,6 +2,101 @@ import GroupNotification from '../../models/GroupNotification.js';
 import Group from '../../models/Group.js';
 import User from '../../models/User.js';
 
+export const addBuddyToGroup = async (groupId, buddyId) => {
+  // check if in the group there is already that buddy
+
+  const retrievedGroup = await Group.find({
+    $and: [{ _id: groupId }, { buddies: { _id: buddyId } }],
+  });
+  // console.log(retrievedGroup);
+
+  const alreadyExists = retrievedGroup.length > 0;
+  // console.log(alreadyExists);
+  if (alreadyExists) {
+    return { alreadyExists };
+  } else {
+    // retrive the buddy
+    const newBuddy = await User.findById(buddyId);
+    // this assumes it is not possible to get to here if the group is already filled! (check frontend)
+    await Group.updateOne(
+      {
+        _id: groupId,
+      },
+      {
+        $push: { buddies: newBuddy },
+      }
+    );
+
+    // if after adding new buddy the group is filled, mark it as 'filled'
+    const updatedGroup = await Group.findById(groupId);
+    // console.log(`updatedGroup.nBuddies: ${updatedGroup.nBuddies}`);
+    // console.log(`updatedGroup.buddies.length: ${updatedGroup.buddies.length}`);
+    if (updatedGroup.nBuddies === updatedGroup.buddies.length) {
+      await updatedGroup.updateOne({
+        $set: { buddiesFilled: true },
+      });
+    }
+
+    return { alreadyExists };
+  }
+};
+
+export const saveGroupJoinedNotification = async (
+  organiserId,
+  buddyId,
+  groupId
+) => {
+  try {
+    const newNotification = {
+      type: 'groupJoined',
+      from: organiserId,
+      text: `You have been added to a new team`,
+      groupId: groupId,
+      isRead: false,
+      date: Date.now(),
+    };
+
+    // console.log(
+    //   `7) from API saveGroupJoinedNotification() newNotification: ${JSON.stringify(
+    //     newNotification
+    //   )}`
+    // );
+
+    await GroupNotification.updateOne(
+      { user: buddyId },
+      {
+        $push: { notifications: newNotification },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const readGroupJoinedNotification = async (
+  // organiserId,
+  buddyId,
+  groupId
+) => {
+  try {
+    // console.log(
+    //   `10) FROM API readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
+    // );
+    await GroupNotification.updateOne(
+      {
+        'notifications.groupId': groupId,
+        user: buddyId,
+        'notifications.$.type': 'groupJoined', // it's an enumeration!! you need .$.
+      },
+      {
+        $set: { 'notifications.$.isRead': true },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // --------- OLD OLD OLD ------- //
 // export const setJoinReqNotification = async (senderId, receiverId, groupId) => {
 //   try {
@@ -284,87 +379,3 @@ import User from '../../models/User.js';
 //     console.log(err);
 //   }
 // };
-
-export const addBuddyToGroup = async (groupId, buddyId) => {
-  // check if in the group there is already that buddy
-
-  const retrievedGroup = await Group.find({
-    $and: [{ _id: groupId }, { buddies: { _id: buddyId } }],
-  });
-  // console.log(retrievedGroup);
-
-  const alreadyExists = retrievedGroup.length > 0;
-  // console.log(alreadyExists);
-  if (alreadyExists) {
-    return { alreadyExists };
-  } else {
-    // retrive the buddy
-    const newBuddy = await User.findById(buddyId);
-    await Group.updateOne(
-      {
-        _id: groupId,
-      },
-      {
-        $push: { buddies: newBuddy },
-      }
-    );
-
-    return { alreadyExists };
-  }
-};
-
-export const saveGroupJoinedNotification = async (
-  organiserId,
-  buddyId,
-  groupId
-) => {
-  try {
-    const newNotification = {
-      type: 'groupJoined',
-      from: organiserId,
-      text: `You have been added to a new team`,
-      groupId: groupId,
-      isRead: false,
-      date: Date.now(),
-    };
-
-    // console.log(
-    //   `7) from API saveGroupJoinedNotification() newNotification: ${JSON.stringify(
-    //     newNotification
-    //   )}`
-    // );
-
-    await GroupNotification.updateOne(
-      { user: buddyId },
-      {
-        $push: { notifications: newNotification },
-      }
-    );
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-export const readGroupJoinedNotification = async (
-  // organiserId,
-  buddyId,
-  groupId
-) => {
-  try {
-    // console.log(
-    //   `10) FROM API readGroupJoinedNotification = organiserId: ${organiserId}, buddyId: ${buddyId},  groupId: ${groupId}`
-    // );
-    await GroupNotification.updateOne(
-      {
-        'notifications.groupId': groupId,
-        user: buddyId,
-        'notifications.$.type': 'groupJoined', // it's an enumeration!! you need .$.
-      },
-      {
-        $set: { 'notifications.$.isRead': true },
-      }
-    );
-  } catch (err) {
-    console.log(err);
-  }
-};

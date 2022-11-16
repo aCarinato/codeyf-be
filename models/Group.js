@@ -21,7 +21,7 @@ const GroupSchema = new Schema({
   topics: [],
   learning: [],
   hasProposedAssignment: { type: Boolean, default: false },
-  //   proposedAssignmentID: '0',
+  // proposedAssignmentID: '0',
   //   proposedProjectLink: '',
   isClosed: { type: Boolean, default: false },
   picture: {

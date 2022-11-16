@@ -175,64 +175,6 @@ io.on('connection', (socket) => {
       await readGroupJoinedNotification(buddyId, groupId);
     }
   );
-
-  // -------------------
-  // OLD OLD OLD
-  // socket.on('joinGroupReq', async ({ senderId, receiverId, groupId }) => {
-  //   // console.log(
-  //   //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
-  //   // );
-
-  //   // set notification on sender - the sender is certainly online and the notifications will be added there too
-  //   const { alreadyExists } = await setJoinReqNotificationSender(
-  //     senderId,
-  //     receiverId,
-  //     groupId
-  //   );
-
-  //   if (!alreadyExists) {
-  //     // Check if the receiver is online
-  //     const receiverSocket = findConnectedUser(receiverId);
-
-  //     if (receiverSocket) {
-  //       io.to(receiverSocket.socketId).emit('joinReqNotification', {
-  //         senderId,
-  //         receiverId,
-  //         groupId,
-  //       });
-  //     } else {
-  //       //  set the notification in the db for the received. when he opens the app it will be loaded
-  //       await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
-  //     }
-  //   }
-  // });
-
-  // socket.on(
-  //   'saveJoinReqNotification',
-  //   async ({ senderId, receiverId, groupId }) => {
-  //     await setJoinReqNotificationReceiver(senderId, receiverId, groupId);
-  //   }
-  // );
-
-  // socket.on(
-  //   'readJoinReqNotification',
-  //   async ({ senderId, receiverId, groupId }) => {
-  //     // console.log(
-  //     //   `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId}`
-  //     // );
-  //     await readJoinReqNotification(senderId, receiverId, groupId);
-  //   }
-  // );
-
-  // socket.on(
-  //   'joinGroupRes',
-  //   async ({ senderId, receiverId, groupId, joinRes }) => {
-  //     console.log(
-  //       `senderId: ${senderId}, receiverId: ${receiverId},  groupId: ${groupId} joinRes: ${joinRes}`
-  //     );
-  //   }
-  // );
-
   // ----------- END OF GROUPS ----------- //
 
   socket.on('leave', async ({ userId }) => {
