@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const GroupNotificationSchema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: 'User' },
+  user: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   notifications: [
     {
       type: {
         type: String,
         enum: ['groupJoinedAsBuddy', 'groupJoinedAsMentor', 'groupMsg'],
+        index: true,
       },
       from: { type: Schema.Types.ObjectId, ref: 'User' },
-      groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
+      groupId: { type: Schema.Types.ObjectId, ref: 'Group', index: true },
       text: { type: String },
       isRead: { type: Boolean, default: false },
       date: { type: Date, default: Date.now },
