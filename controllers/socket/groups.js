@@ -95,9 +95,9 @@ export const addMentorToGroup = async (groupId, mentorId) => {
   // console.log('');
 
   const alreadyExists = retrievedGroup.length > 0;
-  console.log(
-    `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
-  );
+  // console.log(
+  //   `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
+  // );
 
   // TODO - Check if the group has already mentor position filled
   if (alreadyExists) {
@@ -117,15 +117,6 @@ export const addMentorToGroup = async (groupId, mentorId) => {
 
     // if after adding new buddy the group is filled, mark it as 'filled'
     const updatedGroup = await Group.findById(groupId);
-    // console.log(
-    //   `updatedGroup.nMentorsRequired: ${updatedGroup.nMentorsRequired}`
-    // );
-    // console.log(`updatedGroup.mentors.length: ${updatedGroup.mentors.length}`);
-    // console.log(`Number(updatedGroup.nMentorsRequired) ===
-    // Number(updatedGroup.mentors.length): ${
-    //   Number(updatedGroup.nMentorsRequired) ===
-    //   Number(updatedGroup.mentors.length)
-    // }`);
     if (
       Number(updatedGroup.nMentorsRequired) ===
       Number(updatedGroup.mentors.length)
