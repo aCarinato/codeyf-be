@@ -24,6 +24,7 @@ import {
 } from './controllers/socket/chats.js';
 
 import {
+  joinGroupReq,
   addUserToGroup,
   saveGroupJoinedNotification,
   readGroupJoinedNotification,
@@ -116,6 +117,14 @@ io.on('connection', (socket) => {
   // ----------- END OF CHATS ----------- //
 
   // ----------- GROUPS ----------- //
+  socket.on(
+    'joinGroupReq',
+    async ({ organiserId, groupId, userToAddId, type }) => {
+      await joinGroupReq(organiserId, groupId, userToAddId, type);
+      // const userToAddSocket = findConnectedUser(userToAddId);
+    }
+  );
+
   socket.on(
     'addUserToGroup',
     async ({ organiserId, groupId, userToAddId, type }) => {

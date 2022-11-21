@@ -2,6 +2,57 @@ import GroupNotification from '../../models/GroupNotification.js';
 import Group from '../../models/Group.js';
 import User from '../../models/User.js';
 
+export const joinGroupReq = async (organiserId, groupId, userToAddId, type) => {
+  try {
+    const userHasNotifications = await GroupNotification.findOne({
+      user: userToAddId,
+    });
+
+    // should check if the person is already in the group
+    // check if there are already pending notifications of this type
+    // create a notification of the right type that will be pending till approval
+    if (
+      userHasNotifications !== null &&
+      userHasNotifications !== undefined &&
+      userHasNotifications !== {}
+    ) {
+      let newNotification;
+      if (type === 'buddy') {
+        newNotification = {
+          type: 'joinAsBuddyReq',
+          from: organiserId,
+          text: `You have a request to join a group as a buddy`,
+          groupId: groupId,
+          isRead: false,
+          isPending: true,
+          date: Date.now(),
+        };
+      } else if (type === 'mentor') {
+        newNotification = {
+          type: 'joinAsMentorReq',
+          from: organiserId,
+          text: `You have a request to join a group as a buddy`,
+          groupId: groupId,
+          isRead: false,
+          isPending: true,
+          date: Date.now(),
+        };
+      }
+
+      // should check that the user has a notification model (when you delete it it doesn't)
+
+      await GroupNotification.updateOne(
+        { user: userToAddId },
+        {
+          $push: { notifications: newNotification },
+        }
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const addUserToGroup = async (groupId, userToAddId, type) => {
   if (type === 'buddy') {
     const alreadyExists = await addBuddyToGroup(groupId, userToAddId);
