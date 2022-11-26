@@ -2,10 +2,11 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 // A GROUP NEEDS TO HAVE AT LEAST 2 PEOPLE
 const AssignmentSchema = new Schema({
-  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   headline: {
     type: String,
@@ -23,13 +24,14 @@ const AssignmentSchema = new Schema({
   learning: [],
   requirements: [
     {
-      requirement: { type: String },
+      idx: { type: String },
+      label: { type: String },
     },
   ],
 
   mockups: [
     {
-      caption: { type: String, required: true },
+      caption: { type: String },
       picture: {
         url: String,
         public_id: String,
@@ -42,6 +44,7 @@ const AssignmentSchema = new Schema({
   },
   idealTeam: [
     {
+      idx: { type: String },
       nPeople: { type: Number },
       role: { type: String },
     },
