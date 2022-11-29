@@ -38,6 +38,7 @@ import admin from './routes/admin.js';
 // import message from './routes/message.js';
 import chats from './routes/chats.js';
 import groups from './routes/groups.js';
+import assignments from './routes/assignments.js';
 
 connectDB();
 
@@ -217,5 +218,6 @@ app.use('/api/admin', admin);
 // app.use('/api/message', message);
 app.use('/api/chats', chats);
 app.use('/api/groups', groups);
+app.use('/api/assignments', assignments);
 
 httpServer.listen(port, () => console.log(`Server running on port ${port}`));

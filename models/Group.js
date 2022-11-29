@@ -23,6 +23,7 @@ const GroupSchema = new Schema({
   hasProposedAssignment: { type: Boolean, default: false },
   // proposedAssignmentID: '0',
   //   proposedProjectLink: '',
+  deadline: { type: Date },
   isClosed: { type: Boolean, default: false },
   picture: {
     url: String,
