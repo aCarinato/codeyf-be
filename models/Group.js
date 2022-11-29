@@ -10,6 +10,7 @@ const GroupSchema = new Schema({
     type: String,
     required: true,
   },
+  deadline: { type: Date },
   organiser: { type: Schema.Types.ObjectId, ref: 'User' },
   nBuddies: { type: Number, required: true },
   buddies: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -23,7 +24,7 @@ const GroupSchema = new Schema({
   hasProposedAssignment: { type: Boolean, default: false },
   // proposedAssignmentID: '0',
   //   proposedProjectLink: '',
-  deadline: { type: Date },
+
   isClosed: { type: Boolean, default: false },
   picture: {
     url: String,
