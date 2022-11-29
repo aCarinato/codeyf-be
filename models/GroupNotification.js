@@ -12,6 +12,7 @@ const GroupNotificationSchema = new Schema({
           'joinAsMentorReq',
           'groupJoinedAsBuddy',
           'groupJoinedAsMentor',
+          'deadline',
           'groupMsg',
         ],
       },

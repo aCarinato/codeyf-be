@@ -20,6 +20,7 @@ const AssignmentSchema = new Schema({
     type: String,
     required: true,
   },
+  completionTime: { type: Number },
   topics: [],
   learning: [],
   requirements: [
@@ -28,7 +29,9 @@ const AssignmentSchema = new Schema({
       label: { type: String },
     },
   ],
-
+  repo: {
+    type: String,
+  },
   mockups: [
     {
       caption: { type: String },
