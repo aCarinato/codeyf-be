@@ -30,7 +30,7 @@ export const createNewAssignment = async (req, res) => {
 };
 
 // @desc    Get an assignment by its id
-// @route   GET /api/assignment/:groupId
+// @route   GET /api/assignment/:assignmentId
 // @access  Public
 export const getAssignment = async (req, res) => {
   const assignmentId = req.params.assignmentId;

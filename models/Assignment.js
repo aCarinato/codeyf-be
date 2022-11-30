@@ -20,7 +20,7 @@ const AssignmentSchema = new Schema({
     type: String,
     required: true,
   },
-  completionTime: { type: Number },
+  completionTime: { type: Number }, // n. days
   topics: [],
   learning: [],
   requirements: [

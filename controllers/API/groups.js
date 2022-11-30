@@ -67,7 +67,7 @@ export const getGroup = async (req, res) => {
 
   try {
     const group = await Group.findById(groupId).populate(
-      'organiser buddies mentors'
+      'organiser buddies mentors proposedAssignment'
     );
     // console.log(group);
     res.status(200).json({ success: true, group });
