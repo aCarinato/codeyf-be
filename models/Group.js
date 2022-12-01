@@ -29,6 +29,20 @@ const GroupSchema = new Schema({
   },
   //   proposedProjectLink: '',
 
+  requirements: [
+    // {
+    //   idx: { type: String },
+    //   label: { type: String },
+    //   met: { type: Boolean, default: false },
+    // },
+  ],
+  approvals: [
+    {
+      participant: { type: Schema.Types.ObjectId, ref: 'User' },
+      approved: { type: Boolean, default: false },
+    },
+  ],
+
   isClosed: { type: Boolean, default: false },
   picture: {
     url: String,

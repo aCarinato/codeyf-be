@@ -10,6 +10,7 @@ import {
   getUserGroups,
   getNotificationFrom,
   getPendingRequests,
+  checkRequirement,
 } from '../controllers/API/groups.js';
 
 import { requireSignin } from '../middlewares/checkAuth.js';
@@ -25,5 +26,6 @@ router.get(
   getNotificationFrom
 );
 router.get('/group/pending-join-reqs', getPendingRequests);
+router.put('/group/check-requirement', requireSignin, checkRequirement);
 
 export default router;

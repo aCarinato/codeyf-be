@@ -85,7 +85,7 @@ export const saveGroupJoinedNotification = async (
 };
 
 export const readGroupJoinedNotification = async (notificationId) => {
-  console.log('');
+  // console.log('');
   // console.log(
   //   `10) FROM socket controller 'group.js' -  readGroupJoinedNotification() = notificationId: ${notificationId}`
   // );

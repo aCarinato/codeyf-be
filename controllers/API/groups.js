@@ -161,9 +161,74 @@ export const getPendingRequests = async (req, res) => {
       { 'notificationsFrom.type': 'joinReq' }
     );
 
-    console.log(pendingReqs);
+    // console.log(pendingReqs);
 
     // if (pendingReqs)
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// // @desc    Get requirements for a specified group
+// // @route   GET /api/groups/:groupId/requirements
+// // @access  Public
+// export const getRequirements = async (req, res) => {
+//   const groupId = req.params.groupId;
+
+//   try {
+//     const group = await Group.findById(groupId);
+
+//     // check if group has requirements
+//     if (
+//       group.hasProposedAssignment &&
+//       group.requirements &&
+//       group.requirements.length > 0
+//     ) {
+//       res.status(200).json({ success: true, requirements: group.requirements });
+//     } else {
+//       res.status(200).json({
+//         success: false,
+//         message: 'This group does not have requirements',
+//       });
+//     }
+//     // console.log(group);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+// @desc    Check a requirement as met or not
+// @route   PUT /api/groups/group/check-requirement
+// @access  Private
+export const checkRequirement = async (req, res) => {
+  try {
+    const { groupId, requirementId } = req.body;
+    // console.log(`groupId: ${groupId}, requirementId: ${requirementId}`);
+
+    // set it
+    const group = await Group.findById(groupId);
+
+    const requIdx = group.requirements
+      .map((item) => item.idx)
+      .indexOf(requirementId);
+
+    // let res;
+    if (group.requirements[requIdx].met === true) {
+      await Group.updateOne(
+        { _id: groupId, 'requirements.idx': requirementId },
+        { $set: { 'requirements.$.met': false } }
+      );
+    } else {
+      // console.log(
+      //   `group.requirements[requIdx].met: ${group.requirements[requIdx].met}`
+      // );
+      // console.log('sto qua sul false');
+      await Group.updateOne(
+        { _id: groupId, 'requirements.idx': requirementId },
+        { $set: { 'requirements.$.met': true } }
+      );
+    }
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
