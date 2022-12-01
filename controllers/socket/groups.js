@@ -65,6 +65,154 @@ export const addUserToGroup = async (groupId, userToAddId, type) => {
   }
 };
 
+export const addBuddyToGroup = async (groupId, buddyId) => {
+  // check if in the group there is already that buddy
+
+  const retrievedGroup = await Group.find({
+    $and: [{ _id: groupId }, { buddies: { _id: buddyId } }],
+  });
+  // console.log(retrievedGroup);
+
+  // if (retrievedGroup.buddiesFilled === false) {
+  const alreadyExists = retrievedGroup.length > 0;
+  // console.log(alreadyExists);
+  if (alreadyExists) {
+    return alreadyExists;
+  } else {
+    // retrive the buddy
+    const newBuddy = await User.findById(buddyId);
+    // this assumes it is not possible to get to here if the group is already filled! (check frontend)
+    //  I need to retrieve the group again, unfortunately
+    // Check whether to add or not the buddy to the approvals
+    const groupToCheckApproval = await Group.findById(groupId);
+    const participantsId = groupToCheckApproval.approvals.map((item) =>
+      item.participant.toString()
+    );
+    const alreadyInApprovals = participantsId.includes(buddyId);
+
+    // console.log('alreadyInApprovals');
+    // console.log(alreadyInApprovals);
+    const isOrganiser = groupToCheckApproval.organiser.toString() === buddyId;
+    // console.log(`isOrganiser: ${isOrganiser}`);
+    const notAddBuddyToApprovals = !alreadyInApprovals || !isOrganiser;
+    // console.log(`notAddBuddyToApprovals: ${notAddBuddyToApprovals}`);
+
+    if (notAddBuddyToApprovals) {
+      // console.log(
+      //   'buddy is also already a mentor or the organiser. No need to add in the approvals because he is already there'
+      // );
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        // be careful when a buddy is also mentor!!!
+        {
+          $push: {
+            buddies: newBuddy,
+          },
+        }
+      );
+    } else {
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        // be careful when a buddy is also mentor!!!
+        {
+          $push: {
+            buddies: newBuddy,
+            approvals: { participant: newBuddy, approved: false },
+          },
+        }
+      );
+    }
+
+    // if after adding new buddy the group is filled, mark it as 'filled'
+    const updatedGroup = await Group.findById(groupId);
+
+    if (updatedGroup.nBuddies === updatedGroup.buddies.length) {
+      await updatedGroup.updateOne({
+        $set: { buddiesFilled: true },
+      });
+    }
+
+    return alreadyExists;
+  }
+  // } // here i could return an error message to the frontend (buddy positions already filled)
+};
+
+export const addMentorToGroup = async (groupId, mentorId) => {
+  const retrievedGroup = await Group.find({
+    $and: [{ _id: groupId }, { mentors: { _id: mentorId } }],
+  });
+  // console.log('');
+  // console.log(`from groups.js - 'addMentorToGroup' => retrievedGroup:`);
+  // console.log(retrievedGroup);
+  // console.log('');
+
+  const alreadyExists = retrievedGroup.length > 0;
+
+  // TODO - Check if the group has already mentor position filled
+  if (alreadyExists) {
+    return alreadyExists;
+  } else {
+    // retrive the buddy
+    const newMentor = await User.findById(mentorId);
+    //  I need to retrieve the group again, unfortunately
+
+    // Check whether to add or not the mentor to the approvals
+    const groupToCheckApproval = await Group.findById(groupId);
+    const participantsId = groupToCheckApproval.approvals.map((item) =>
+      item.participant.toString()
+    );
+    const alreadyInApprovals = participantsId.includes(mentorId);
+    const isOrganiser = groupToCheckApproval.organiser.toString() === mentorId;
+    const notAddMentorToApprovals = !alreadyInApprovals || !isOrganiser;
+
+    if (notAddMentorToApprovals) {
+      // console.log(
+      //   'mentor is also already a buddy or the organiser. No need to add in the approvals because he is already there'
+      // );
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        {
+          $push: {
+            mentors: newMentor,
+          },
+        }
+      );
+    } else {
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        {
+          $push: {
+            mentors: newMentor,
+            approvals: { participant: newMentor, approved: false },
+          },
+        }
+      );
+    }
+
+    // if after adding new buddy the group is filled, mark it as 'filled'
+    const updatedGroup = await Group.findById(groupId);
+    if (
+      Number(updatedGroup.nMentorsRequired) ===
+      Number(updatedGroup.mentors.length)
+    ) {
+      await updatedGroup.updateOne({
+        $set: { mentorsFilled: true },
+      });
+    }
+
+    return alreadyExists;
+  }
+  // } // here i could return an error message to the frontend (mentor positions already filled)
+};
+
 export const saveGroupJoinedNotification = async (
   organiserId,
   userToAddId,
@@ -94,92 +242,6 @@ export const readGroupJoinedNotification = async (notificationId) => {
     { $set: { 'notifications.$.isRead': true } }
   );
   // console.log(notification);
-};
-
-export const addBuddyToGroup = async (groupId, buddyId) => {
-  // check if in the group there is already that buddy
-
-  const retrievedGroup = await Group.find({
-    $and: [{ _id: groupId }, { buddies: { _id: buddyId } }],
-  });
-  // console.log(retrievedGroup);
-
-  // if (retrievedGroup.buddiesFilled === false) {
-  const alreadyExists = retrievedGroup.length > 0;
-  // console.log(alreadyExists);
-  if (alreadyExists) {
-    return alreadyExists;
-  } else {
-    // retrive the buddy
-    const newBuddy = await User.findById(buddyId);
-    // this assumes it is not possible to get to here if the group is already filled! (check frontend)
-    await Group.updateOne(
-      {
-        _id: groupId,
-      },
-      {
-        $push: { buddies: newBuddy },
-      }
-    );
-
-    // if after adding new buddy the group is filled, mark it as 'filled'
-    const updatedGroup = await Group.findById(groupId);
-
-    if (updatedGroup.nBuddies === updatedGroup.buddies.length) {
-      await updatedGroup.updateOne({
-        $set: { buddiesFilled: true },
-      });
-    }
-
-    return alreadyExists;
-  }
-  // } // here i could return an error message to the frontend (buddy positions already filled)
-};
-
-export const addMentorToGroup = async (groupId, mentorId) => {
-  const retrievedGroup = await Group.find({
-    $and: [{ _id: groupId }, { mentors: { _id: mentorId } }],
-  });
-  // console.log('');
-  // console.log(`from groups.js - 'addMentorToGroup' => retrievedGroup:`);
-  // console.log(retrievedGroup);
-  // console.log('');
-
-  const alreadyExists = retrievedGroup.length > 0;
-  // console.log(
-  //   `from groups.js - 'addMentorToGroup' => alreadyExists: ${alreadyExists}`
-  // );
-
-  // TODO - Check if the group has already mentor position filled
-  if (alreadyExists) {
-    return alreadyExists;
-  } else {
-    // retrive the buddy
-    const newMentor = await User.findById(mentorId);
-    // this assumes it is not possible to get to here if the group is already filled! (check frontend)
-    await Group.updateOne(
-      {
-        _id: groupId,
-      },
-      {
-        $push: { mentors: newMentor },
-      }
-    );
-
-    // if after adding new buddy the group is filled, mark it as 'filled'
-    const updatedGroup = await Group.findById(groupId);
-    if (
-      Number(updatedGroup.nMentorsRequired) ===
-      Number(updatedGroup.mentors.length)
-    ) {
-      await updatedGroup.updateOne({
-        $set: { mentorsFilled: true },
-      });
-    }
-
-    return alreadyExists;
-  }
-  // } // here i could return an error message to the frontend (mentor positions already filled)
 };
 
 export const saveGroupJoinedAsBuddyNotification = async (
