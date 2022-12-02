@@ -67,17 +67,6 @@ const AssignmentSchema = new Schema({
       ],
     },
   ],
-
-  //   nBuddies: { type: Number, required: true },
-  //   buddies: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  //   buddiesFilled: { type: Boolean, default: false },
-  //   mentorRequired: { type: Boolean, default: false },
-  //   nMentorsRequired: { type: Number, default: 1 },
-
-  //   picture: {
-  //     url: String,
-  //     public_id: String,
-  //   },
 });
 
 const Assignment = mongoose.model('Assignment', AssignmentSchema);
