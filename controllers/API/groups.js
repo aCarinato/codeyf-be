@@ -7,7 +7,7 @@ import GroupNotification from '../../models/GroupNotification.js';
 // @access  Public
 export const getAllGroups = async (req, res) => {
   try {
-    const groups = await Group.find();
+    const groups = await Group.find({ isClosed: false });
     // console.log(groups);
     res.status(200).json({ success: true, groups });
   } catch (err) {
@@ -315,7 +315,7 @@ export const closeGroup = async (req, res) => {
       { _id: groupId },
       { $set: { isClosed: true } }
     );
-    console.log(action.modifiedCount);
+    // console.log(action.modifiedCount);
     if (action.modifiedCount === 1) {
       res.status(200).json({ success: true });
     } else {
