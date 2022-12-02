@@ -99,13 +99,36 @@ export const getNotifications = async (req, res) => {
   }
 };
 
+// @desc    Get all completed groups
+// @route   GET /api/groups/user/completed/:userId
+// @access  Public
+export const getCompletedGroups = async (req, res) => {
+  try {
+    const groups = await Group.find({
+      $and: [
+        { isClosed: true },
+        {
+          $or: [
+            { buddies: { $in: [req.user._id] } },
+            { mentors: { $in: [req.user._id] } },
+          ],
+        },
+      ],
+    });
+    // console.log(groups);
+    res.status(200).json({ success: true, groups });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // @desc    Get the groups managed (created) by a user
 // @route   GET /api/groups/user/:userId
 // @access  Private
 export const getUserGroups = async (req, res) => {
   const userId = req.params.userId;
   try {
-    const groups = await Group.find({ organiser: userId });
+    const groups = await Group.find({ organiser: userId, isClosed: false });
     res.status(200).json({ success: true, groups });
   } catch (err) {
     console.log(err);
@@ -119,7 +142,10 @@ export const getBuddyPartakenGroups = async (req, res) => {
   // const userId = req.params.userId;
   // console.log(`req.user._id ${req.user._id}`);
   try {
-    const groups = await Group.find({ buddies: { $in: [req.user._id] } });
+    const groups = await Group.find({
+      buddies: { $in: [req.user._id] },
+      isClosed: false,
+    });
     // console.log(groups);
     res.status(200).json({ success: true, groups });
   } catch (err) {
@@ -132,7 +158,10 @@ export const getBuddyPartakenGroups = async (req, res) => {
 // @access  Private
 export const getMentorPartakenGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ mentors: { $in: [req.user._id] } });
+    const groups = await Group.find({
+      mentors: { $in: [req.user._id] },
+      isClosed: false,
+    });
     res.status(200).json({ success: true, groups });
   } catch (err) {
     console.log(err);
@@ -265,6 +294,28 @@ export const approveCompletion = async (req, res) => {
       { $set: { 'approvals.$.approved': true } }
     );
     // console.log(action.modifiedCount);
+    if (action.modifiedCount === 1) {
+      res.status(200).json({ success: true });
+    } else {
+      res.status(200).json({ success: false });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Close a group after all requirements are met and all memebers approved
+// @route   PUT /api/groups/group/close
+// @access  Private
+export const closeGroup = async (req, res) => {
+  try {
+    const { groupId } = req.body;
+    // const group = await Group.findById(groupId);
+    const action = await Group.updateOne(
+      { _id: groupId },
+      { $set: { isClosed: true } }
+    );
+    console.log(action.modifiedCount);
     if (action.modifiedCount === 1) {
       res.status(200).json({ success: true });
     } else {
