@@ -73,6 +73,10 @@ export const addBuddyToGroup = async (groupId, buddyId) => {
   });
   // console.log(retrievedGroup);
 
+  // !!!!!!!!!!!!!!!!!!!!!!
+  // ALSO CHECK THAT:
+  // IF the n.buddies=1 and the buddy is already a mentor, he cannot add himself as a buddy!!!
+
   // if (retrievedGroup.buddiesFilled === false) {
   const alreadyExists = retrievedGroup.length > 0;
   // console.log(alreadyExists);
@@ -84,20 +88,34 @@ export const addBuddyToGroup = async (groupId, buddyId) => {
     // this assumes it is not possible to get to here if the group is already filled! (check frontend)
     //  I need to retrieve the group again, unfortunately
     // Check whether to add or not the buddy to the approvals
+
     const groupToCheckApproval = await Group.findById(groupId);
     const participantsId = groupToCheckApproval.approvals.map((item) =>
       item.participant.toString()
     );
     const alreadyInApprovals = participantsId.includes(buddyId);
-
-    // console.log('alreadyInApprovals');
-    // console.log(alreadyInApprovals);
     const isOrganiser = groupToCheckApproval.organiser.toString() === buddyId;
-    // console.log(`isOrganiser: ${isOrganiser}`);
-    const notAddBuddyToApprovals = !alreadyInApprovals || !isOrganiser;
-    // console.log(`notAddBuddyToApprovals: ${notAddBuddyToApprovals}`);
+    // const notAddBuddyToApprovals = alreadyInApprovals || isOrganiser;
+    const addBuddyToApprovals = !(alreadyInApprovals || isOrganiser);
 
-    if (notAddBuddyToApprovals) {
+    // console.log(`alreadyInApprovals: ${alreadyInApprovals}`);
+    // console.log(`isOrganiser: ${isOrganiser}`);
+    // console.log(`addBuddyToApprovals: ${addBuddyToApprovals}`);
+
+    if (addBuddyToApprovals) {
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        // be careful when a buddy is also mentor!!!
+        {
+          $push: {
+            buddies: newBuddy,
+            approvals: { participant: newBuddy, approved: false },
+          },
+        }
+      );
+    } else {
       // console.log(
       //   'buddy is also already a mentor or the organiser. No need to add in the approvals because he is already there'
       // );
@@ -109,19 +127,6 @@ export const addBuddyToGroup = async (groupId, buddyId) => {
         {
           $push: {
             buddies: newBuddy,
-          },
-        }
-      );
-    } else {
-      await Group.updateOne(
-        {
-          _id: groupId,
-        },
-        // be careful when a buddy is also mentor!!!
-        {
-          $push: {
-            buddies: newBuddy,
-            approvals: { participant: newBuddy, approved: false },
           },
         }
       );
@@ -142,6 +147,10 @@ export const addBuddyToGroup = async (groupId, buddyId) => {
 };
 
 export const addMentorToGroup = async (groupId, mentorId) => {
+  // !!!!!!!!!!!!!!!!!!!!!!
+  // ALSO CHECK THAT:
+  // IF the n.buddies=1 and the buddy is already a mentor, he cannot add himself as a buddy!!!
+
   const retrievedGroup = await Group.find({
     $and: [{ _id: groupId }, { mentors: { _id: mentorId } }],
   });
@@ -167,9 +176,24 @@ export const addMentorToGroup = async (groupId, mentorId) => {
     );
     const alreadyInApprovals = participantsId.includes(mentorId);
     const isOrganiser = groupToCheckApproval.organiser.toString() === mentorId;
-    const notAddMentorToApprovals = !alreadyInApprovals || !isOrganiser;
+    const addMentorToApprovals = !(alreadyInApprovals || isOrganiser);
+    // console.log(`alreadyInApprovals: ${alreadyInApprovals}`);
+    // console.log(`isOrganiser: ${isOrganiser}`);
+    // console.log(`addMentorToApprovals: ${addMentorToApprovals}`);
 
-    if (notAddMentorToApprovals) {
+    if (addMentorToApprovals) {
+      await Group.updateOne(
+        {
+          _id: groupId,
+        },
+        {
+          $push: {
+            mentors: newMentor,
+            approvals: { participant: newMentor, approved: false },
+          },
+        }
+      );
+    } else {
       // console.log(
       //   'mentor is also already a buddy or the organiser. No need to add in the approvals because he is already there'
       // );
@@ -180,18 +204,6 @@ export const addMentorToGroup = async (groupId, mentorId) => {
         {
           $push: {
             mentors: newMentor,
-          },
-        }
-      );
-    } else {
-      await Group.updateOne(
-        {
-          _id: groupId,
-        },
-        {
-          $push: {
-            mentors: newMentor,
-            approvals: { participant: newMentor, approved: false },
           },
         }
       );

@@ -83,36 +83,56 @@ export const getNotifications = async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    // console.log('SIAMO QUA');
-    // console.log(`userId: ${userId}`);
-
     const groupNotifications = await GroupNotification.find({
       user: userId,
     });
     // console.log(`from API getNotifications`);
     // console.log(groupNotifications);
-    res.status(200).json({
-      success: true,
-      notifications: groupNotifications[0].notifications,
-      // notificationsFrom: groupNotifications[0].notificationsFrom,
-      // notificationsTo: groupNotifications[0].notificationsTo,
-      // notifications: [
-      //   { notificationsFrom: groupNotifications.notificationsFrom },
-      //   { notificationsTo: groupNotifications.notificationsTo },
-      // ],
-    });
+    if (groupNotifications.length > 0) {
+      res.status(200).json({
+        success: true,
+        notifications: groupNotifications[0].notifications,
+      });
+    }
   } catch (err) {
     console.log(err);
   }
 };
 
 // @desc    Get the groups managed (created) by a user
-// @route   GET /api/groups/notifications/:userId
+// @route   GET /api/groups/user/:userId
 // @access  Private
 export const getUserGroups = async (req, res) => {
   const userId = req.params.userId;
   try {
     const groups = await Group.find({ organiser: userId });
+    res.status(200).json({ success: true, groups });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Get the groups partaken as a buddy by a user
+// @route   GET /api/groups/user/buddy-partaken/:userId
+// @access  Private
+export const getBuddyPartakenGroups = async (req, res) => {
+  // const userId = req.params.userId;
+  // console.log(`req.user._id ${req.user._id}`);
+  try {
+    const groups = await Group.find({ buddies: { $in: [req.user._id] } });
+    // console.log(groups);
+    res.status(200).json({ success: true, groups });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Get the groups partaken as a buddy by a user
+// @route   GET /api/groups/user/mentor-partaken/:userId
+// @access  Private
+export const getMentorPartakenGroups = async (req, res) => {
+  try {
+    const groups = await Group.find({ mentors: { $in: [req.user._id] } });
     res.status(200).json({ success: true, groups });
   } catch (err) {
     console.log(err);
@@ -138,8 +158,6 @@ export const getNotificationFrom = async (req, res) => {
       selectedNotification = notification[0].notifications.filter(
         (notification) => notification._id.toString() === notificationId
       )[0];
-      // console.log('selectedNotification');
-      // console.log(selectedNotification);
       res
         .status(200)
         .json({ success: true, notification: selectedNotification });
@@ -230,6 +248,28 @@ export const checkRequirement = async (req, res) => {
       );
     }
     res.status(200).json({ success: true });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Approve the completion
+// @route   PUT /api/groups/group/approve-completion
+// @access  Private
+export const approveCompletion = async (req, res) => {
+  try {
+    const { groupId } = req.body;
+    // const group = await Group.findById(groupId);
+    const action = await Group.updateOne(
+      { _id: groupId, 'approvals.participant': req.user._id },
+      { $set: { 'approvals.$.approved': true } }
+    );
+    // console.log(action.modifiedCount);
+    if (action.modifiedCount === 1) {
+      res.status(200).json({ success: true });
+    } else {
+      res.status(200).json({ success: false });
+    }
   } catch (err) {
     console.log(err);
   }
