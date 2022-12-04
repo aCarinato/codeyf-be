@@ -25,7 +25,7 @@ const GroupSchema = new Schema({
   proposedAssignment: {
     type: Schema.Types.ObjectId,
     ref: 'Assignment',
-    default: '',
+    // default: '',
   },
   //   proposedProjectLink: '',
 
