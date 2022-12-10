@@ -13,6 +13,19 @@ export const getAllAssignments = async (req, res) => {
   }
 };
 
+// @desc    Get all assignments
+// @route   GET /api/assignments/limit
+// @access  Public
+export const getLimitedAssignments = async (req, res) => {
+  try {
+    const assignments = await Assignment.find().limit(7);
+    // console.log(groups);
+    res.status(200).json({ success: true, assignments });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // @desc    Create a new assignment
 // @route   POST /api/assignments/new
 // @access  Private

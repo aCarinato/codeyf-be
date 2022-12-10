@@ -15,6 +15,19 @@ export const getAllGroups = async (req, res) => {
   }
 };
 
+// @desc    Get all groups
+// @route   GET /api/groups/limit
+// @access  Public
+export const getLimitedGroups = async (req, res) => {
+  try {
+    const groups = await Group.find({ isClosed: false }).limit(7);
+    // console.log(groups);
+    res.status(200).json({ success: true, groups });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // @desc    Create a new group
 // @route   POST /api/groups/new
 // @access  Private
