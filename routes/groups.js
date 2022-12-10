@@ -4,6 +4,7 @@ const router = express.Router();
 
 import {
   getAllGroups,
+  getLimitedGroups,
   getGroup,
   createNewGroup,
   getNotifications,
@@ -21,6 +22,7 @@ import {
 import { requireSignin } from '../middlewares/checkAuth.js';
 
 router.get('/', getAllGroups);
+router.get('/limit', getLimitedGroups);
 router.get('/:groupId', getGroup);
 router.post('/new', requireSignin, createNewGroup);
 router.get('/notifications/:userId', requireSignin, getNotifications);

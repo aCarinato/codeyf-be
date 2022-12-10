@@ -4,6 +4,7 @@ const router = express.Router();
 
 import {
   getAllAssignments,
+  getLimitedAssignments,
   createNewAssignment,
   getAssignment,
 } from '../controllers/API/assignments.js';
@@ -11,6 +12,7 @@ import {
 import { requireSignin } from '../middlewares/checkAuth.js';
 
 router.get('/', getAllAssignments);
+router.get('/limit', getLimitedAssignments);
 router.get('/:assignmentId', getAssignment);
 router.post('/new', requireSignin, createNewAssignment);
 // router.get('/notifications/:userId', requireSignin, getNotifications);

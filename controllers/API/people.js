@@ -11,14 +11,8 @@ import User from '../../models/User.js';
 // @desc    Get all buddies
 // @route   GET /api/people/buddies
 // @access  Public
-export const getBuddies = async (req, res) => {
+export const getAllBuddies = async (req, res) => {
   try {
-    // const { userEmail } = req.body;
-    // const buddies = await User.find({
-    //   isBuddy: true,
-    //   email: { $ne: userEmail },
-    // });
-
     const buddies = await User.find({
       isBuddy: true,
     });
@@ -33,16 +27,56 @@ export const getBuddies = async (req, res) => {
   }
 };
 
+// @desc    Get all buddies
+// @route   GET /api/people/buddies/limited
+// @access  Public
+export const getLimitedBuddies = async (req, res) => {
+  try {
+    const buddies = await User.find({
+      isBuddy: true,
+    }).limit(7);
+
+    if (buddies) {
+      res.status(200).json({ success: true, buddies });
+    } else {
+      res.status(200).json({ success: false, message: 'Buddies not found' });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // @desc    Get all mentors
 // @route   GET /api/people/mentors
 // @access  Public
-export const getMentors = async (req, res) => {
+export const getAllMentors = async (req, res) => {
   try {
     // const { userEmail } = req.body;
     const mentors = await User.find({
       isMentor: true,
       // email: { $ne: userEmail },
     });
+
+    if (mentors) {
+      res.status(200).json({ success: true, mentors });
+    } else {
+      res.status(200).json({ success: false, message: 'Mentors not found' });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Get all mentors
+// @route   GET /api/people/mentors/limit
+// @access  Public
+export const getLimitedMentors = async (req, res) => {
+  try {
+    // const { userEmail } = req.body;
+    const mentors = await User.find({
+      isMentor: true,
+      // email: { $ne: userEmail },
+    }).limit(7);
 
     if (mentors) {
       res.status(200).json({ success: true, mentors });
