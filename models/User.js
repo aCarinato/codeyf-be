@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema(
     profilePic: {
       url: String,
       public_id: String,
+      default: {},
     },
     isBuddy: {
       type: Boolean,

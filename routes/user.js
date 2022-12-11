@@ -6,6 +6,7 @@ const router = express.Router();
 import {
   // getUser,
   completeProfile,
+  updateProfile,
   deleteProfile,
   readNotifications,
   uploadImage,
@@ -14,6 +15,7 @@ import { requireSignin } from '../middlewares/checkAuth.js';
 
 // router.post('/', requireSignin, getUser);
 router.put('/complete-profile', requireSignin, completeProfile);
+router.put('/update-profile', requireSignin, updateProfile);
 router.delete('/delete-profile', requireSignin, deleteProfile);
 router.put('/read-notifications', requireSignin, readNotifications);
 router.post(

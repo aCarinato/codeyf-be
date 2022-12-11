@@ -107,13 +107,74 @@ export const completeProfile = async (req, res) => {
   }
 };
 
-// @desc    Completing user's profile
+// @desc    Update user's profile
+// @route   PUT /api/user/update-profile
+// @access  Private
+export const updateProfile = async (req, res) => {
+  // console.log(req.body);
+  const {
+    shortDescription,
+    longDescription,
+    country,
+    languages,
+    topics,
+    learning,
+    profilePic,
+    github,
+    teaching,
+    linkedin,
+  } = req.body;
+
+  // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
+  // const user = await User.findById(req.user._id);
+  // console.log(user);
+  let user;
+  try {
+    user = await User.findById(req.user._id);
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (user) {
+    // const userID = user._id;
+    await User.updateOne(
+      { _id: req.user._id },
+      {
+        $set: {
+          shortDescription,
+          longDescription,
+          country,
+          languages,
+          topics,
+          learning,
+          profilePic,
+          github,
+          teaching,
+          linkedin,
+        },
+        // $push: {
+        //   notifications:
+        //     'Congratulations, your request to be a mentor was approved!',
+        // },
+      }
+    );
+
+    res.status(200).json({ success: true, message: `Profile updated!` });
+  } else {
+    return res.json({
+      error: 'User not found!',
+    });
+  }
+};
+
+// @desc    Deleting user's profile
 // @route   PUT /api/user/complete-profile
 // @access  Private
 export const deleteProfile = async (req, res) => {
   try {
     let user = await User.findByIdAndDelete(req.user._id);
     res.json({ success: true, message: 'profile deleted' });
+    // I should delete also the related messages / assignments / notifications
   } catch (err) {
     console.log(err);
   }
