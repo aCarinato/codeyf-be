@@ -49,7 +49,9 @@ export const getAssignment = async (req, res) => {
   const assignmentId = req.params.assignmentId;
   // console.log(assignmentId);
   try {
-    const assignment = await Assignment.findById(assignmentId);
+    const assignment = await Assignment.findById(assignmentId).populate(
+      'createdBy'
+    );
     // console.log(group);
     res.status(200).json({ success: true, assignment });
   } catch (err) {
