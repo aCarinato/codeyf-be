@@ -20,7 +20,10 @@ export const getAllGroups = async (req, res) => {
 // @access  Public
 export const getLimitedGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ isClosed: false }).limit(7);
+    const groups = await Group.find({
+      isClosed: false,
+      nBuddies: { $gt: 1 },
+    }).limit(7);
     // console.log(groups);
     res.status(200).json({ success: true, groups });
   } catch (err) {
