@@ -70,6 +70,10 @@ const AssignmentSchema = new Schema(
     ],
     resources: [],
     isPublic: { type: Boolean, default: false },
+    picture: {
+      url: String,
+      public_id: String,
+    },
   },
   { timestamps: true }
 );

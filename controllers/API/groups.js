@@ -7,7 +7,7 @@ import GroupNotification from '../../models/GroupNotification.js';
 // @access  Public
 export const getAllGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ isClosed: false });
+    const groups = await Group.find({ isClosed: false, nBuddies: { $gt: 1 } });
     // console.log(groups);
     res.status(200).json({ success: true, groups });
   } catch (err) {

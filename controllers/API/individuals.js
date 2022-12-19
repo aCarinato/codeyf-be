@@ -23,7 +23,7 @@ export const getAllStudentsSeekingMentors = async (req, res) => {
   }
 };
 
-// @desc    Get all students seeking a mentor for individual project
+// @desc    Get 7 students seeking a mentor for individual project (for home page)
 // @route   GET /api/individuals/students/limit
 // @access  Public
 export const getLimitedStudentsSeekingMentors = async (req, res) => {
@@ -70,7 +70,7 @@ export const getAllMentorsSeekingStudents = async (req, res) => {
   }
 };
 
-// @desc    Get all mentors seeking a student for individual project
+// @desc    Get 7 mentors seeking a student for individual project (for home page)
 // @route   GET /api/individuals/mentors/limit
 // @access  Public
 export const getLimitedMentorsSeekingStudents = async (req, res) => {

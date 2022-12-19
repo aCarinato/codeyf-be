@@ -7,6 +7,10 @@ const GroupSchema = new Schema(
       type: String,
       required: true,
     },
+    headline: {
+      type: String,
+      required: true,
+    },
     description: {
       type: String,
       required: true,
